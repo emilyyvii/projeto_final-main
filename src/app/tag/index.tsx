@@ -8,7 +8,11 @@ export default function Tag() {
     <View style={styles.container}>
       <View style={styles.header}>
         <Pressable style={styles.arrowBack} onPress={() => router.navigate("/home")}>
-          <Ionicons name="arrow-back" size={24} color="#FFD400" />
+          <Ionicons 
+          name="arrow-back" 
+          size={24} 
+          color="#FFD400" 
+          />
         </Pressable>
         <Text style={styles.title}>Tag</Text>
       </View>
@@ -34,8 +38,6 @@ export default function Tag() {
 
         <Image style={styles.esquerdo} source={require("@/assets/imagens/esquerdo.png")} />
         <Image style={styles.direito} source={require("@/assets/imagens/direito.png")} />
-
-
     </View>
   );
 }
