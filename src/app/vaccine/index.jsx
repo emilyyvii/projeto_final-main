@@ -1,6 +1,7 @@
 import React, { useState } from "react";
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, FlatList } from "react-native";
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, FlatList, Pressable } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { router } from "expo-router";
 
 export default function VacinasScreen() {
   const [vacinas, setVacinas] = useState([]);
@@ -48,10 +49,16 @@ export default function VacinasScreen() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Vacinas</Text>
-
-      {/* Cabeçalho */}
-      <View style={[styles.row, styles.header]}>
+       {/* Topo */}
+      <View style={styles.header}>
+          <Pressable onPress={() => router.back()}>
+            <Ionicons name="arrow-back" size={28} color="#fdcb58" />
+          </Pressable>
+          <Text style={styles.headerTitle}>Informações de contato</Text>
+      </View>
+      <View style={styles.tableVaccine}>
+        {/* Cabeçalho */}
+      <View style={[styles.row, styles.columTable]}>
         <Text style={[styles.cell, { flex: 2, fontWeight: "bold" }]}>Vacinas</Text>
         <Text style={[styles.cell, { fontWeight: "bold" }]}>Data</Text>
         <Text style={[styles.cell, { fontWeight: "bold" }]}>Validade</Text>
@@ -67,8 +74,9 @@ export default function VacinasScreen() {
 
       {/* Botão + */}
       <TouchableOpacity style={styles.addButton} onPress={addVacina}>
-        <Ionicons name="add" size={28} color="#1E1E7A" />
+        <Ionicons name="add" size={28} color="#fdcb58" />
       </TouchableOpacity>
+      </View>
     </View>
   );
 }
@@ -76,8 +84,7 @@ export default function VacinasScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#FFD54F",
-    padding: 20,
+    backgroundColor: "#fdcb58",
   },
   title: {
     fontSize: 26,
@@ -87,12 +94,33 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
   header: {
-    backgroundColor: "#1E1E7A",
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#002E9D",
+    paddingTop: 50,
+    paddingBottom: 15,
+    paddingHorizontal: 20,
+  },
+  headerTitle: {
+    color: "#fff",
+    fontSize: 20,
+    fontWeight: "bold",
+    marginLeft: 10,
+  },
+  tableVaccine:{
+    marginTop:350,
+    width:"90%",
+    justifyContent:"center",
+     alignSelf: "center",
+  },
+  columTable: {
+    backgroundColor: "#141496",
+    
   },
   row: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#3F51B5",
+    backgroundColor: "#2e63ce",
     borderRadius: 10,
     marginVertical: 4,
     paddingHorizontal: 8,
@@ -103,14 +131,15 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontSize: 14,
     paddingHorizontal: 4,
+    paddingVertical: 10,
   },
   trash: {
     padding: 6,
   },
   addButton: {
-    backgroundColor: "#FFF",
-    width: 55,
-    height: 55,
+    backgroundColor: "#141496",
+    width: 45,
+    height: 45,
     borderRadius: 50,
     alignItems: "center",
     justifyContent: "center",

@@ -7,8 +7,8 @@ import {
   ScrollView,
   StyleSheet,
 } from "react-native";
-import { useRouter, useLocalSearchParams } from "expo-router";
-import { MaterialIcons } from "@expo/vector-icons";
+import { useRouter} from "expo-router";
+import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { useHealth } from "../../components/context/HealthProvinder";
 import HealthItem from "../../components/HealthItem";
  
@@ -44,7 +44,7 @@ export default function Health() {
           style={styles.addIconContainer}
           onPress={() => setShowInput(true)}
         >
-          <MaterialIcons name="add-circle" size={42} color="#fdcb58" />
+          <Ionicons name="add" size={28} color="#142A8C" />
         </TouchableOpacity>
       ) : (
         <View style={styles.inputContainer}>
@@ -111,8 +111,18 @@ const styles = StyleSheet.create({
         marginTop: 350,
     },
   addIconContainer: {
-    alignSelf: "center",
     marginBottom: 16,
+    borderRadius: 50,
+    backgroundColor:"#fdcb58",
+    width: 45,
+    height: 45,
+    alignItems: "center",
+    justifyContent: "center",
+    alignSelf: "center",
+    marginTop: 20,
+    shadowColor: "#000",
+    shadowOpacity: 0.2,
+    shadowRadius: 3,
   },
   inputContainer: {
     flexDirection: "row",
