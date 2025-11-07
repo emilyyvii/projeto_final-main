@@ -4,8 +4,7 @@ import { createContext, useEffect, useState } from "react";
 export const PetContext = createContext();
 
 export function PetProvider({ children }) {
-
-  const PETS_STORAGE_KEY = 'fokus-pets';
+  const PETS_STORAGE_KEY = "fokus-pets";
 
   const [pets, setPets] = useState([]);
   const [isLoaded, setIsLoaded] = useState(false);
@@ -56,8 +55,10 @@ export function PetProvider({ children }) {
     setPets((oldPets) => oldPets.filter((p) => p.id !== id));
   };
 
+  const getPetById = (id) => pets.find((p) => p.id === id);
+
   return (
-    <PetContext.Provider value={{ pets, addPet, updatePet, deletePet }}>
+    <PetContext.Provider value={{ pets, addPet, updatePet, deletePet, getPetById }}>
       {children}
     </PetContext.Provider>
   );
