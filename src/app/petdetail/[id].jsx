@@ -41,7 +41,12 @@ export default function PetDetail() {
           />
           <RecordButton
             title={"Problemas de Saúde"}
-            onPress={() => router.navigate("/health")}
+            onPress={() =>
+              router.push({
+                pathname: "/health",
+                params: { petId: String(pet.id) }, 
+              })
+            }
           />
           <RecordButton
             title={"Vacinas"}
@@ -50,7 +55,11 @@ export default function PetDetail() {
           <RecordButton
             title={"Alimentação"}
             onPress={() =>
-              router.navigate("/food")}
+              router.push({
+                pathname: "/food",
+                params: { petId: String(pet.id) }, 
+              })
+            }
           />
         </View>
       </View>

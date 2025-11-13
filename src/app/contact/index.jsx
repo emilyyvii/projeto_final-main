@@ -1,9 +1,11 @@
 import { useState, useEffect } from "react";
 import {View, Text, StyleSheet, TextInput, Pressable, Keyboard,} from "react-native";
 import { useRouter, useLocalSearchParams } from "expo-router";
-import { Ionicons } from "@expo/vector-icons";
+import { MaterialIcons, Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-
+ 
+const KEY_TELEFONE = "@contact_telefone";
+const KEY_EMAIL = "@contact_email";
  
 export default function Contact() {
   const router = useRouter();
@@ -58,7 +60,7 @@ export default function Contact() {
  
   return (
     <View style={styles.container}>
-      {/* Topo */}
+ 
       <View style={styles.header}>
         <Pressable onPress={() => router.back()}>
           <Ionicons name="arrow-back" size={28} color="#fdcb58" />
@@ -67,13 +69,12 @@ export default function Contact() {
       </View>
  
       <View style={styles.Content}>
-        {/* Telefone */}
         <View style={styles.infoBox}>
           <View style={styles.infoHeader}>
             <Text style={styles.label}>Número de telefone</Text>
             {podeEditar && (
               <Pressable onPress={toggleEditTelefone}>
-                <Ionicons name="pencil" size={22} color="#fdcb58" />
+                <MaterialIcons name="edit" size={22} color="#F7C843" />
               </Pressable>
             )}
           </View>
@@ -98,7 +99,7 @@ export default function Contact() {
             <Text style={styles.label}>E-mail</Text>
             {podeEditar && (
               <Pressable onPress={toggleEditEmail}>
-                <Ionicons name="pencil" size={22} color="#fdcb58" />
+               <MaterialIcons name="edit" size={22} color="#F7C843" />
               </Pressable>
             )}
           </View>
@@ -134,10 +135,10 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
   },
   headerTitle: {
-    color: "#fdcb58",
-    fontSize: 18,
+    color: "#fff",
+    fontSize: 20,
     fontWeight: "bold",
-    marginLeft: 12,
+    marginLeft: 10,
   },
  
   bannerText: { color: "#fff", fontSize: 14 },

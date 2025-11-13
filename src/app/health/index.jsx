@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -7,80 +7,139 @@ import {
   ScrollView,
   StyleSheet,
 } from "react-native";
-import { useRouter, useLocalSearchParams } from "expo-router";
-import { MaterialIcons } from "@expo/vector-icons";
-import { useHealth } from "../../components/context/HealthProvinder";
+import { useLocalSearchParams, useRouter } from "expo-router";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import HealthItem from "../../components/HealthItem";
- 
+
 export default function Health() {
   const router = useRouter();
-  const { healthIssues, addIssue, editIssue, deleteIssue } = useHealth();
+  const { petId } = useLocalSearchParams();
+
+  const [healthIssues, setHealthIssues] = useState([]);
   const [newIssue, setNewIssue] = useState("");
   const [showInput, setShowInput] = useState(false);
- 
+  const [isLoaded, setIsLoaded] = useState(false);
+
+  const STORAGE_KEY = `@health_issues_${petId}`;
+
+  useEffect(() => {
+    if (!petId) return;
+
+    const loadHealthIssues = async () => {
+      try {
+        const storedData = await AsyncStorage.getItem(STORAGE_KEY);
+        if (storedData) {
+          setHealthIssues(JSON.parse(storedData));
+        }
+      } catch (error) {
+        console.log("Erro ao carregar problemas de saúde:", error);
+      } finally {
+        setIsLoaded(true);
+      }
+    };
+
+    loadHealthIssues();
+  }, [petId]);
+
+  useEffect(() => {
+    if (!isLoaded) return;
+    const saveHealthIssues = async () => {
+      try {
+        await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(healthIssues));
+      } catch (error) {
+        console.log("Erro ao salvar problemas de saúde:", error);
+      }
+    };
+    saveHealthIssues();
+  }, [healthIssues]);
+
+
   const handleAdd = () => {
     if (newIssue.trim()) {
-      addIssue(newIssue);
+      const newItem = {
+        id: Date.now().toString(),
+        text: newIssue,
+      };
+      setHealthIssues((prev) => [...prev, newItem]);
       setNewIssue("");
       setShowInput(false);
     }
   };
- 
+
+  const handleEdit = (id, newText) => {
+    setHealthIssues((prev) =>
+      prev.map((item) => (item.id === id ? { ...item, text: newText } : item))
+    );
+  };
+
+  const handleDelete = (id) => {
+    setHealthIssues((prev) => prev.filter((item) => item.id !== id));
+  };
+
+  if (!petId) {
+    return (
+      <View style={[styles.container, { justifyContent: "center", alignItems: "center" }]}>
+        <Text style={{ color: "#fff" }}>Pet não encontrado</Text>
+      </View>
+    );
+  }
+
   return (
     <View style={styles.container}>
-      {/* ======= Header com seta de voltar ======= */}
+      {/* ======= Header ======= */}
       <View style={styles.header}>
-      <TouchableOpacity onPress={() => router.back()}>
+        <TouchableOpacity onPress={() => router.back()}>
           <MaterialIcons name="arrow-back" size={28} color="#fdcb58" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Problemas de Saúde</Text>
-        <View/>
+        <View />
       </View>
- 
-    <View style={styles.contentHealth}>
+
+      <View style={styles.contentHealth}>
         {/* ======= Botão de adicionar ======= */}
-      {!showInput ? (
-        <TouchableOpacity
-          style={styles.addIconContainer}
-          onPress={() => setShowInput(true)}
-        >
-          <MaterialIcons name="add-circle" size={42} color="#fdcb58" />
-        </TouchableOpacity>
-      ) : (
-        <View style={styles.inputContainer}>
-          <TextInput
-            style={styles.input}
-            placeholder="Descreva um problema de saúde..."
-            placeholderTextColor="#aaa"
-            value={newIssue}
-            onChangeText={setNewIssue}
-          />
-          <TouchableOpacity style={styles.addButton} onPress={handleAdd}>
-            <Text style={styles.addText}>Salvar</Text>
+        {!showInput ? (
+          <TouchableOpacity
+            style={styles.addIconContainer}
+            onPress={() => setShowInput(true)}
+          >
+            <Ionicons name="add" size={28} color="#142A8C" />
           </TouchableOpacity>
-        </View>
-      )}
- 
-      {/* ======= Lista ======= */}
-      <ScrollView style={styles.list}>
-        {healthIssues.length === 0 ? (
-          <Text style={styles.emptyText}>Nenhum problema registrado ainda.</Text>
         ) : (
-          healthIssues.map((item) => (
-            <HealthItem
-              key={item.id}
-              item={item}
-              onEdit={editIssue}
-              onDelete={deleteIssue}
+          <View style={styles.inputContainer}>
+            <TextInput
+              style={styles.input}
+              placeholder="Descreva um problema de saúde..."
+              placeholderTextColor="#aaa"
+              value={newIssue}
+              onChangeText={setNewIssue}
             />
-          ))
+            <TouchableOpacity style={styles.addButton} onPress={handleAdd}>
+              <Text style={styles.addText}>Salvar</Text>
+            </TouchableOpacity>
+          </View>
         )}
-      </ScrollView>
-    </View>
+
+        {/* ======= Lista ======= */}
+        <ScrollView style={styles.list}>
+          {healthIssues.length === 0 ? (
+            <Text style={styles.emptyText}>Nenhum problema registrado ainda.</Text>
+          ) : (
+            healthIssues.map((item) => (
+              <HealthItem
+                key={item.id}
+                item={item}
+                onEdit={handleEdit}
+                onDelete={handleDelete}
+              />
+            ))
+          )}
+        </ScrollView>
+      </View>
     </View>
   );
 }
- 
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -100,19 +159,28 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     marginLeft: 10,
   },
-    contentHealth: {
-        backgroundColor: "#142A8C",
-        borderRadius: 14,
-        padding: 16,
-        justifyContent: "center",
-        width: "90%",
-        height: "auto",
-        alignSelf: "center",
-        marginTop: 350,
-    },
-  addIconContainer: {
+  contentHealth: {
+    backgroundColor: "#142A8C",
+    borderRadius: 14,
+    padding: 16,
+    justifyContent: "center",
+    width: "90%",
     alignSelf: "center",
+    marginTop: 350,
+  },
+  addIconContainer: {
     marginBottom: 16,
+    borderRadius: 50,
+    backgroundColor: "#fdcb58",
+    width: 45,
+    height: 45,
+    alignItems: "center",
+    justifyContent: "center",
+    alignSelf: "center",
+    marginTop: 20,
+    shadowColor: "#000",
+    shadowOpacity: 0.2,
+    shadowRadius: 3,
   },
   inputContainer: {
     flexDirection: "row",
