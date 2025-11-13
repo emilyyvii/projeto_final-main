@@ -37,23 +37,20 @@ export default function PetDetail() {
         <View style={styles.grid}>
           <RecordButton
             title={"Contato"}
-            onPress={() => router.navigate(`/contact?tipo=dono`)}
+            onPress={() =>  router.navigate("/contact")}
           />
           <RecordButton
             title={"Problemas de Saúde"}
-            onPress={() => router.navigate(`/health?id=${pet.id}&tipo=dono`)}
+            onPress={() => router.navigate("/health")}
           />
           <RecordButton
             title={"Vacinas"}
-            onPress={() => router.navigate(`/vaccine?id=${pet.id}&tipo=dono`)}
+            onPress={() => router.navigate("/vaccine")}
           />
           <RecordButton
             title={"Alimentação"}
             onPress={() =>
-              router.navigate(
-                `/food?id=${encodeURIComponent(pet.id)}&tipo=dono`
-              )
-            }
+              router.navigate("/food")}
           />
         </View>
       </View>
@@ -147,4 +144,3 @@ const styles = StyleSheet.create({
     gap: 13,
   },
 });
- 

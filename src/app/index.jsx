@@ -14,14 +14,7 @@ export default function Index() {
 
     <TouchableOpacity
       style={styles.button}
-      onPress={() => {
-        const petId = pets.length > 0 ? pets[0].id : null;
-        if (petId) {
-          router.navigate("/mypets");
-        } else {
-          alert("Nenhum pet cadastrado ainda!");
-        }
-      }}
+      onPress={() => router.navigate("/mypets")}
     >
       <Text style={styles.title}>PROFISSIONAL</Text>
     </TouchableOpacity>
@@ -29,7 +22,7 @@ export default function Index() {
       {/* ENCONTREI PET (visitante) */}
       <TouchableOpacity
         style={styles.button}
-        onPress={() => router.navigate("/contact?tipo=encontrou")}
+        onPress={() => router.navigate("/contact")}
       >
         <Text style={styles.title}>ENCONTREI PET</Text>
       </TouchableOpacity>
