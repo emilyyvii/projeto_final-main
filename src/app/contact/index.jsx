@@ -60,7 +60,7 @@ export default function Contact() {
 
   return (
     <View style={styles.container}>
-      {/* Topo */}
+
       <View style={styles.header}>
         <Pressable onPress={() => router.back()}>
           <Ionicons name="arrow-back" size={28} color="#fdcb58" />
@@ -69,7 +69,6 @@ export default function Contact() {
       </View>
 
       <View style={styles.Content}>
-        {/* Telefone */}
         <View style={styles.infoBox}>
           <View style={styles.infoHeader}>
             <Text style={styles.label}>Número de telefone</Text>
