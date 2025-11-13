@@ -1,81 +1,108 @@
 import React, { useState } from "react";
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, FlatList, Pressable } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { router } from "expo-router";
+import { useRouter, useLocalSearchParams } from "expo-router";
 
 export default function VacinasScreen() {
+  const router = useRouter();
+
+  const { tipo } = useLocalSearchParams(); 
+  const podeEditar = tipo === "dono"; 
+  const podeExcluir = tipo === "dono"; 
+
   const [vacinas, setVacinas] = useState([]);
 
   const addVacina = () => {
+    if (!podeEditar) return;
     const nova = { id: Date.now(), nome: "", aplicacao: "", validade: "" };
     setVacinas([...vacinas, nova]);
   };
 
   const editarCampo = (id, campo, valor) => {
+    if (!podeEditar) return;
     setVacinas(
       vacinas.map((v) => (v.id === id ? { ...v, [campo]: valor } : v))
     );
   };
 
   const excluirVacina = (id) => {
+    if (!podeExcluir) return;
     setVacinas(vacinas.filter((v) => v.id !== id));
   };
 
   const renderItem = ({ item }) => (
     <View style={styles.row}>
+      {/* Nome da Vacina */}
       <TextInput
-        style={[styles.cell, { flex: 2 }]}
+        style={[styles.cell, { flex: 2, color: "#fff" }]}
         placeholder="Nome da Vacina"
+        placeholderTextColor="#ddd"
         value={item.nome}
         onChangeText={(t) => editarCampo(item.id, "nome", t)}
+        editable={podeEditar}
       />
+      {/* Data */}
       <TextInput
-        style={styles.cell}
+        style={[styles.cell, { color: "#fff" }]}
         placeholder="Data"
+        placeholderTextColor="#ddd"
         value={item.aplicacao}
         onChangeText={(t) => editarCampo(item.id, "aplicacao", t)}
+        editable={podeEditar}
       />
+      {/* Validade */}
       <TextInput
-        style={styles.cell}
+        style={[styles.cell, { color: "#fff" }]}
         placeholder="Validade"
+        placeholderTextColor="#ddd"
         value={item.validade}
         onChangeText={(t) => editarCampo(item.id, "validade", t)}
+        editable={podeEditar}
       />
-      <TouchableOpacity onPress={() => excluirVacina(item.id)}>
-        <Ionicons name="trash" size={22} color="#fff" style={styles.trash} />
-      </TouchableOpacity>
+      {/* Lixeira (só aparece se pode excluir) */}
+      {podeExcluir && (
+        <TouchableOpacity onPress={() => excluirVacina(item.id)}>
+          <Ionicons name="trash" size={22} color="#fff" style={styles.trash} />
+        </TouchableOpacity>
+      )}
     </View>
   );
 
   return (
     <View style={styles.container}>
-       {/* Topo */}
+      {/* Topo */}
       <View style={styles.header}>
-          <Pressable onPress={() => router.back()}>
-            <Ionicons name="arrow-back" size={28} color="#fdcb58" />
-          </Pressable>
-          <Text style={styles.headerTitle}>Informações de contato</Text>
+        <Pressable onPress={() => router.back()}>
+          <Ionicons name="arrow-back" size={28} color="#fdcb58" />
+        </Pressable>
+        <Text style={styles.headerTitle}>Vacinas</Text>
       </View>
+
       <View style={styles.tableVaccine}>
         {/* Cabeçalho */}
-      <View style={[styles.row, styles.columTable]}>
-        <Text style={[styles.cell, { flex: 2, fontWeight: "bold" }]}>Vacinas</Text>
-        <Text style={[styles.cell, { fontWeight: "bold" }]}>Data</Text>
-        <Text style={[styles.cell, { fontWeight: "bold" }]}>Validade</Text>
-        <View style={{ width: 30 }} />
-      </View>
+        <View style={[styles.row, styles.columTable]}>
+          <Text style={[styles.cell, { flex: 2, fontWeight: "bold" }]}>Vacinas</Text>
+          <Text style={[styles.cell, { fontWeight: "bold" }]}>Data</Text>
+          <Text style={[styles.cell, { fontWeight: "bold" }]}>Validade</Text>
+          <View style={{ width: 30 }} />
+        </View>
 
-      {/* Tabela */}
-      <FlatList
-        data={vacinas}
-        keyExtractor={(item) => item.id.toString()}
-        renderItem={renderItem}
-      />
+        {/* Lista de Vacinas */}
+        <FlatList
+          data={vacinas}
+          keyExtractor={(item) => item.id.toString()}
+          renderItem={renderItem}
+          ListEmptyComponent={
+            <Text style={styles.emptyText}>Nenhuma vacina adicionada</Text>
+          }
+        />
 
-      {/* Botão + */}
-      <TouchableOpacity style={styles.addButton} onPress={addVacina}>
-        <Ionicons name="add" size={28} color="#fdcb58" />
-      </TouchableOpacity>
+        {/* Botão + (apenas para o dono) */}
+        {podeEditar && (
+          <TouchableOpacity style={styles.addButton} onPress={addVacina}>
+            <Ionicons name="add" size={28} color="#fdcb58" />
+          </TouchableOpacity>
+        )}
       </View>
     </View>
   );
@@ -85,13 +112,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#fdcb58",
-  },
-  title: {
-    fontSize: 26,
-    fontWeight: "bold",
-    color: "#1E1E7A",
-    marginBottom: 20,
-    textAlign: "center",
   },
   header: {
     flexDirection: "row",
@@ -107,15 +127,14 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     marginLeft: 10,
   },
-  tableVaccine:{
-    marginTop:350,
-    width:"90%",
-    justifyContent:"center",
-     alignSelf: "center",
+  tableVaccine: {
+    marginTop: 50,
+    width: "90%",
+    justifyContent: "center",
+    alignSelf: "center",
   },
   columTable: {
     backgroundColor: "#141496",
-    
   },
   row: {
     flexDirection: "row",
@@ -148,5 +167,10 @@ const styles = StyleSheet.create({
     shadowColor: "#000",
     shadowOpacity: 0.2,
     shadowRadius: 3,
+  },
+  emptyText: {
+    textAlign: "center",
+    color: "#002E9D",
+    marginTop: 10,
   },
 });

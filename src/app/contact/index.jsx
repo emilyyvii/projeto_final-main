@@ -60,7 +60,6 @@ export default function Contact() {
  
   return (
     <View style={styles.container}>
- 
       <View style={styles.header}>
         <Pressable onPress={() => router.back()}>
           <Ionicons name="arrow-back" size={28} color="#fdcb58" />
