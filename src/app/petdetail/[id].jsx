@@ -5,10 +5,10 @@ import { Ionicons } from "@expo/vector-icons";
 import RecordButton from "../../components/RecordButton";
 import Footer from "../../components/Footer";
 
-
 export default function PetDetail() {
   const { id } = useLocalSearchParams();
   const { pets } = usePetContext();
+
   const pet = pets.find((p) => p.id === id);
 
   if (!pet) return <Text>Pet não encontrado</Text>;
@@ -16,7 +16,10 @@ export default function PetDetail() {
   return (
     <View style={styles.container}>
       <View style={styles.containerInfo}>
-        <Pressable style={styles.arrowBack} onPress={() => router.navigate("/mypets")}>
+        <Pressable
+          style={styles.arrowBack}
+          onPress={() => router.navigate("/mypets")}
+        >
           <Ionicons name="arrow-back" size={28} color="#fdcb58" />
         </Pressable>
 
@@ -32,11 +35,32 @@ export default function PetDetail() {
       <View style={styles.containerButton}>
         <Text style={styles.text}>Ficha do Animal</Text>
         <View style={styles.grid}>
-          {/* 👇 Aqui o dono acessa com tipo=dono */}
-          <RecordButton title={"Contato"} onPress={() => router.navigate("/contact?tipo=dono")} />
-          <RecordButton title={"Problemas de Saúde"} onPress={() => router.navigate("/health")} />
-          <RecordButton title={"Vacinas"} onPress={() => router.navigate("/vaccine")} />
-          <RecordButton title={"Alimentação"} onPress={() => router.navigate("/home")} />
+          <RecordButton
+            title={"Contato"}
+            onPress={() =>  router.navigate("/contact")}
+          />
+          <RecordButton
+            title={"Problemas de Saúde"}
+            onPress={() =>
+              router.push({
+                pathname: "/health",
+                params: { petId: String(pet.id) }, 
+              })
+            }
+          />
+          <RecordButton
+            title={"Vacinas"}
+            onPress={() => router.navigate("/vaccine")}
+          />
+          <RecordButton
+            title={"Alimentação"}
+            onPress={() =>
+              router.push({
+                pathname: "/food",
+                params: { petId: String(pet.id) }, 
+              })
+            }
+          />
         </View>
       </View>
 

@@ -3,20 +3,20 @@ import {View, Text, StyleSheet, TextInput, Pressable, Keyboard,} from "react-nat
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { MaterialIcons, Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-
+ 
 const KEY_TELEFONE = "@contact_telefone";
 const KEY_EMAIL = "@contact_email";
-
+ 
 export default function Contact() {
   const router = useRouter();
   const { tipo } = useLocalSearchParams();
-  const podeEditar = tipo === "dono"; 
-
+  const podeEditar = tipo === "dono";
+ 
   const [telefone, setTelefone] = useState("");
   const [email, setEmail] = useState("");
   const [editandoTelefone, setEditandoTelefone] = useState(false);
   const [editandoEmail, setEditandoEmail] = useState(false);
-
+ 
   useEffect(() => {
     (async () => {
       try {
@@ -29,7 +29,7 @@ export default function Contact() {
       }
     })();
   }, []);
-
+ 
   const saveToStorage = async (key, value) => {
     try {
       await AsyncStorage.setItem(key, value ?? "");
@@ -37,7 +37,7 @@ export default function Contact() {
       console.warn("Erro ao salvar:", err);
     }
   };
-
+ 
   const toggleEditTelefone = () => {
     if (!podeEditar) return;
     const novo = !editandoTelefone;
@@ -47,7 +47,7 @@ export default function Contact() {
     }
     setEditandoTelefone(novo);
   };
-
+ 
   const toggleEditEmail = () => {
     if (!podeEditar) return;
     const novo = !editandoEmail;
@@ -57,19 +57,17 @@ export default function Contact() {
     }
     setEditandoEmail(novo);
   };
-
+ 
   return (
     <View style={styles.container}>
-      {/* Topo */}
       <View style={styles.header}>
         <Pressable onPress={() => router.back()}>
           <Ionicons name="arrow-back" size={28} color="#fdcb58" />
         </Pressable>
         <Text style={styles.headerTitle}>Informações de contato</Text>
       </View>
-
+ 
       <View style={styles.Content}>
-        {/* Telefone */}
         <View style={styles.infoBox}>
           <View style={styles.infoHeader}>
             <Text style={styles.label}>Número de telefone</Text>
@@ -93,7 +91,7 @@ export default function Contact() {
             <Text style={styles.value}>{telefone || "—"}</Text>
           )}
         </View>
-
+ 
         {/* Email */}
         <View style={styles.infoBox}>
           <View style={styles.infoHeader}>
@@ -124,7 +122,7 @@ export default function Contact() {
     </View>
   );
 }
-
+ 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#F7C843" },
   header: {
@@ -141,7 +139,7 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     marginLeft: 10,
   },
-
+ 
   bannerText: { color: "#fff", fontSize: 14 },
   Content: { marginTop: 40 },
   infoBox: {
@@ -153,7 +151,7 @@ const styles = StyleSheet.create({
     width: "90%",
     alignSelf: "center",
   },
-  
+ 
   infoHeader: {
     flexDirection: "row",
     justifyContent: "space-between",

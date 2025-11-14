@@ -1,8 +1,10 @@
 import { router } from "expo-router";
 import { StyleSheet, Text, TouchableOpacity, View, Image } from "react-native";
 import Footer from "../components/Footer";
+import usePetContext from "../components/context/usePetContext";
 
 export default function Index() {
+  const { pets } = usePetContext();
   return (
     <View style={styles.container}>
       <Image
@@ -10,18 +12,17 @@ export default function Index() {
         source={require("@/assets/imagens/1.png")}
       />
 
-      {/* PROFISSIONAL */}
-      <TouchableOpacity
-        style={styles.button}
-        onPress={() => router.navigate("/signin")}
-      >
-        <Text style={styles.title}>PROFISSIONAL</Text>
-      </TouchableOpacity>
+    <TouchableOpacity
+      style={styles.button}
+      onPress={() => router.navigate("/mypets")}
+    >
+      <Text style={styles.title}>PROFISSIONAL</Text>
+    </TouchableOpacity>
 
       {/* ENCONTREI PET (visitante) */}
       <TouchableOpacity
         style={styles.button}
-        onPress={() => router.navigate("/contact?tipo=encontrou")}
+        onPress={() => router.navigate("/contact")}
       >
         <Text style={styles.title}>ENCONTREI PET</Text>
       </TouchableOpacity>
