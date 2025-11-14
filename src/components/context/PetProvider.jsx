@@ -1,15 +1,14 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { createContext, useEffect, useState } from "react";
- 
+
 export const PetContext = createContext();
- 
+
 export function PetProvider({ children }) {
-  const getPetById = (id) => pets.find((p) => p.id === id);
   const PETS_STORAGE_KEY = 'fokus-pets';
- 
+
   const [pets, setPets] = useState([]);
   const [isLoaded, setIsLoaded] = useState(false);
- 
+
   useEffect(() => {
     const getData = async () => {
       try {
@@ -23,7 +22,7 @@ export function PetProvider({ children }) {
     };
     getData();
   }, []);
- 
+
   useEffect(() => {
     const storeData = async (value) => {
       try {
@@ -33,33 +32,48 @@ export function PetProvider({ children }) {
         console.log("Erro ao salvar pets:", e);
       }
     };
- 
+
     if (isLoaded) {
       storeData(pets);
     }
   }, [pets]);
- 
+
   const addPet = (newPet) => {
     setPets((oldPets) => [
       ...oldPets,
       { ...newPet, id: Date.now().toString() },
     ]);
   };
- 
+
   const updatePet = (id, updatedData) => {
     setPets((oldPets) =>
       oldPets.map((p) => (p.id === id ? { ...p, ...updatedData } : p))
     );
   };
- 
+
+  const updatePetImage = (id, newUri) => {
+    setPets((oldPets) =>
+      oldPets.map((p) =>
+        p.id === id ? { ...p, photo: newUri } : p
+      )
+    );
+  };
+
   const deletePet = (id) => {
     setPets((oldPets) => oldPets.filter((p) => p.id !== id));
   };
- 
+
   return (
-    <PetContext.Provider value={{ pets, addPet, updatePet, deletePet }}>
+    <PetContext.Provider
+      value={{
+        pets,
+        addPet,
+        updatePet,
+        deletePet,
+        updatePetImage, 
+      }}
+    >
       {children}
     </PetContext.Provider>
   );
 }
- 

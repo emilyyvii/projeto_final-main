@@ -3,18 +3,40 @@ import { View, Text, TextInput, Image, StyleSheet, Pressable } from "react-nativ
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import usePetContext from "../../components/context/usePetContext";
+import * as ImagePicker from "expo-image-picker";  
 
 export default function AddPet() {
   const { addPet } = usePetContext();
   const [name, setName] = useState("");
   const [breed, setBreed] = useState("");
-  const [age, setAge] = useState("");
+  const [birthDate, setBirthDate] = useState(""); // <-- novo campo
   const [photo, setPhoto] = useState("");
 
+  const handlePickImage = async () => {
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      quality: 1,
+    });
+
+    if (!result.canceled) {
+      setPhoto(result.assets[0].uri);
+    }
+  };
+
   const handleSave = () => {
-    if (!name || !breed || !age || !photo)
+    if (!name || !breed || !birthDate || !photo)
       return alert("Preencha todos os campos!");
-    addPet({ name, breed, age, photo });
+
+    const newPet = {
+      id: String(Date.now()), 
+      name,
+      breed,
+      birthDate, // <-- salvando data
+      photo,
+    };
+
+    addPet(newPet);
     router.replace("/mypets");
   };
 
@@ -28,13 +50,11 @@ export default function AddPet() {
 
       <View style={styles.card}>
         <Text style={styles.label}>Foto do Pet:</Text>
-        <TextInput
-          style={styles.input}
-          placeholder="URL da Foto"
-          placeholderTextColor="#ccc"
-          value={photo}
-          onChangeText={setPhoto}
-        />
+        <Pressable style={styles.photoPicker} onPress={handlePickImage}>
+          <Ionicons name="image" size={20} color="#141496" />
+          <Text style={styles.photoPickerText}>Escolher foto</Text>
+        </Pressable>
+
         {photo ? <Image source={{ uri: photo }} style={styles.preview} /> : null}
 
         <TextInput
@@ -53,10 +73,10 @@ export default function AddPet() {
         />
         <TextInput
           style={styles.input}
-          placeholder="Idade"
+          placeholder="Data de Nascimento (DD/MM/AAAA)"
           placeholderTextColor="#ccc"
-          value={age}
-          onChangeText={setAge}
+          value={birthDate}
+          onChangeText={setBirthDate}
         />
 
         <Pressable style={styles.saveButton} onPress={handleSave}>
@@ -70,7 +90,7 @@ export default function AddPet() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#141496", // azul de fundo
+    backgroundColor: "#141496",
     alignItems: "center",
     padding: 20,
   },
@@ -101,6 +121,20 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     color: "#141496",
     marginBottom: 6,
+  },
+  photoPicker: {
+    backgroundColor: "#fff",
+    padding: 10,
+    borderRadius: 10,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+    marginBottom: 20,
+  },
+  photoPickerText: {
+    color: "#141496",
+    fontWeight: "600",
   },
   input: {
     backgroundColor: "#fff",
