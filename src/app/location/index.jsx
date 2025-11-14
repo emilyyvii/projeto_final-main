@@ -118,13 +118,12 @@ const styles = StyleSheet.create({
     flex: 1,
   },
 
-  // Foto no mapa (sem cortar)
+  // Foto no mapa
   petIcon: {
-    width: 55,
-    height: 55,
-    borderRadius: 27.5,
+    width: 50,
+    height: 50,
     borderWidth: 2,
-    borderColor: "#fff",
+    borderColor: "#e0e0e0ff",
     resizeMode: "cover",
     backgroundColor: "#fff",
   },
