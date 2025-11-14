@@ -9,22 +9,19 @@ export default function Report() {
   const [selectedPetId, setSelectedPetId] = useState(pets[0]?.id);
   const [petStats, setPetStats] = useState({});
 
-  // inicializa stats por pet
   useEffect(() => {
     const initial = {};
     pets.forEach((pet) => {
       initial[pet.id] = {
-        heartRate: 50 + Math.floor(Math.random() * 40), // 50 - 89
+        heartRate: 50 + Math.floor(Math.random() * 40), 
         steps: Math.floor(Math.random() * 2000),
         calories: Math.floor(Math.random() * 300),
       };
     });
     setPetStats(initial);
-    // se nenhum selecionado, escolhe o primeiro
     if (!selectedPetId && pets[0]) setSelectedPetId(pets[0].id);
   }, [pets]);
 
-  // simula atualização
   useEffect(() => {
     const interval = setInterval(() => {
       setPetStats((prev) => {
@@ -32,7 +29,6 @@ export default function Report() {
         pets.forEach((pet) => {
           const p = prev[pet.id];
           if (!p) return;
-          // limita valores para não ficarem estranhos
           const newHR = Math.max(35, Math.min(140, p.heartRate + (Math.random() > 0.55 ? 1 : -1)));
           const newSteps = p.steps + Math.floor(Math.random() * 8);
           const newCalories = p.calories + Math.floor(Math.random() * 3);
@@ -52,7 +48,6 @@ export default function Report() {
   const selectedPet = pets.find((p) => p.id === selectedPetId);
   const stats = petStats[selectedPetId];
 
-  // status bar padding (funciona bem no Android/iOS)
   const STATUSBAR_HEIGHT = Platform.OS === "android" ? StatusBar.currentHeight || 0 : 0;
 
   if (!selectedPet || !stats) return null;
@@ -68,7 +63,6 @@ export default function Report() {
           <Text style={styles.headerTitle}>Relatório do Animal</Text>
         </View>
 
-        {/* Lista horizontal de pets */}
         <ScrollView
           horizontal
           contentContainerStyle={styles.petList}
@@ -89,12 +83,10 @@ export default function Report() {
               />
             </Pressable>
           ))}
-          {/* espaço vazio para alinhamento visual */}
           <View style={{ width: 16 }} />
         </ScrollView>
 
         <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
-          {/* CARD BATIMENTOS */}
           <Text style={styles.sectionTitle}>Batimentos cardíacos</Text>
           <View style={styles.card}>
             <View style={styles.circleContainer}>
@@ -110,7 +102,6 @@ export default function Report() {
             </View>
           </View>
 
-          {/* ATIVIDADES */}
           <Text style={styles.sectionTitle}>Atividade física</Text>
           <View style={styles.card}>
             <View style={styles.activityRow}>
@@ -139,17 +130,16 @@ export default function Report() {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: "#FFD45C",
+    backgroundColor: "#141496",
   },
   container: {
     flex: 1,
     backgroundColor: "#FFD45C",
   },
   header: {
-    width: "100%",
     backgroundColor: "#141496",
     paddingTop: 12, 
-    paddingBottom: 12,
+    paddingBottom: 20,
     alignItems: "center",
     justifyContent: "center",
     position: "relative",
@@ -163,7 +153,7 @@ const styles = StyleSheet.create({
     position: "absolute",
     left: 14,
     top: 12,
-    padding: 6,
+    padding: 3,
     zIndex: 20,
   },
 
