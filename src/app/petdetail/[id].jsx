@@ -4,14 +4,32 @@ import usePetContext from "../../components/context/usePetContext";
 import { Ionicons } from "@expo/vector-icons";
 import RecordButton from "../../components/RecordButton";
 import Footer from "../../components/Footer";
+import * as ImagePicker from "expo-image-picker";
+import { useState } from "react";
 
 export default function PetDetail() {
   const { id } = useLocalSearchParams();
-  const { pets } = usePetContext();
+  const { pets, updatePetImage } = usePetContext(); // 👈 usa só updatePetImage
 
   const pet = pets.find((p) => p.id === id);
+  const [photo, setPhoto] = useState(pet?.photo || "");
 
   if (!pet) return <Text>Pet não encontrado</Text>;
+
+  // Escolher imagem da galeria
+  const handlePickImage = async () => {
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      quality: 1,
+    });
+
+    if (!result.canceled) {
+      const newUri = result.assets[0].uri;
+      setPhoto(newUri);
+      updatePetImage(pet.id, newUri); // 👈 atualiza só a imagem
+    }
+  };
 
   return (
     <View style={styles.container}>
@@ -23,9 +41,15 @@ export default function PetDetail() {
           <Ionicons name="arrow-back" size={28} color="#fdcb58" />
         </Pressable>
 
-        <Image source={{ uri: pet.photo }} style={styles.image} />
+        {/* FOTO */}
+        <Pressable onPress={handlePickImage}>
+          <Image source={{ uri: photo }} style={styles.image} />
+        </Pressable>
+
+        {/* Nome (fixo) */}
         <Text style={styles.name}>{pet.name}</Text>
 
+        {/* Raça e Idade (somente exibição) */}
         <View style={styles.ageBox}>
           <Text style={styles.age}>{pet.breed}</Text>
           <Text style={styles.age}>{pet.age} anos</Text>
@@ -37,15 +61,12 @@ export default function PetDetail() {
         <View style={styles.grid}>
           <RecordButton
             title={"Contato"}
-            onPress={() =>  router.navigate("/contact")}
+            onPress={() => router.navigate("/contact")}
           />
           <RecordButton
             title={"Problemas de Saúde"}
             onPress={() =>
-              router.push({
-                pathname: "/health",
-                params: { petId: String(pet.id) }, 
-              })
+              router.push({ pathname: "/health", params: { petId: String(pet.id) } })
             }
           />
           <RecordButton
@@ -55,16 +76,14 @@ export default function PetDetail() {
           <RecordButton
             title={"Alimentação"}
             onPress={() =>
-              router.push({
-                pathname: "/food",
-                params: { petId: String(pet.id) }, 
-              })
+              router.push({ pathname: "/food", params: { petId: String(pet.id) } })
             }
           />
         </View>
       </View>
-
+    <View style={styles.footer}>
       <Footer text="Apaixonados por animais" textColor="#fff" showImage={false} />
+    </View>
     </View>
   );
 }
@@ -152,4 +171,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     gap: 13,
   },
+  footer: {
+    top: 60
+  }
 });
