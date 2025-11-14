@@ -24,7 +24,7 @@ export default function Index() {
         style={styles.button}
         onPress={() => router.navigate("/contact")}
       >
-        <Text style={styles.title}>ENCONTREI PET</Text>
+        <Text style={styles.title}>ENCONTREI O PET</Text>
       </TouchableOpacity>
 
       {/* DONO PET (exemplo) */}
@@ -32,7 +32,7 @@ export default function Index() {
         style={styles.button}
         onPress={() => router.navigate("/signin")}
       >
-        <Text style={styles.title}>DONO PET</Text>
+        <Text style={styles.title}>TUTOR</Text>
       </TouchableOpacity>
 
       <View style={styles.footer}>

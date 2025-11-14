@@ -1,47 +1,52 @@
 import { View, Image, StyleSheet, Pressable, Text } from "react-native";
 import { router } from "expo-router";
 import Footer from "../../components/Footer";
+import { Ionicons } from "@expo/vector-icons";
 
-export default function Home() {  return (
+export default function Home() {
+  return (
     <View style={styles.container}>
-      <Image style={styles.header} source={require("@/assets/imagens/header.png")} />
+      <View style={styles.headerContainer}>
+        <Image style={styles.header} source={require("@/assets/imagens/header.png")} />
+        <Pressable style={styles.bellButton} onPress={() => router.navigate('/alert')}>
+          <Ionicons name="notifications" size={32} color="#142A8C" />
+        </Pressable>
+      </View>
 
       <View style={styles.grid}>
-         <View style={styles.item}>
-           <Pressable style={styles.button} onPress={() => router.navigate('/location')}>
+        <View style={styles.item}>
+          <Pressable style={styles.button} onPress={() => router.navigate('/location')}>
             <Image style={styles.icon} source={require("@/assets/imagens/localizacao.png")} />
-           </Pressable>
-           <Text style={styles.text}>Localização{"\n"}em Tempo Real</Text>
-         </View>
+          </Pressable>
+          <Text style={styles.text}>Localização{"\n"}em Tempo Real</Text>
+        </View>
 
-         <View style={styles.item}>
+        <View style={styles.item}>
           <Pressable style={styles.button} onPress={() => router.navigate('/tag')}>
             <Image style={styles.icon} source={require("@/assets/imagens/tag.png")} />
           </Pressable>
           <Text style={styles.text}>Tag</Text>
-         </View>
-    
-         <View style={styles.item}>
+        </View>
+
+        <View style={styles.item}>
           <Pressable style={styles.button} onPress={() => router.navigate('/mypets')}>
             <Image style={styles.icon} source={require("@/assets/imagens/meuspets.png")} />
           </Pressable>
           <Text style={styles.text}>Meus Pets</Text>
-         </View>
+        </View>
 
-         <View style={styles.item}>
+        <View style={styles.item}>
           <Pressable style={styles.button} onPress={() => router.navigate('/report')}>
             <Image style={styles.icon} source={require("@/assets/imagens/relatorio.png")} />
           </Pressable>
           <Text style={styles.text}>Relatórios{"\n"}do Animal</Text>
-         </View>
+        </View>
       </View>
+
       <View style={styles.footer}>
-        <Footer
-          text="Apaixonados por animal"
-          textColor="000"
-          showImage={true}
-        />
+        <Footer text="Apaixonados por animal" textColor="000" showImage={true} />
       </View>
+
     </View>
   );
 }
@@ -52,9 +57,26 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
     alignItems: "center",
   },
-  header: {
-    width:413
+
+  headerContainer: {
+    width: "100%",
+    position: "relative",
+    alignItems: "center",
   },
+
+  header: {
+    width: 413,
+    height: 180,
+    resizeMode: "cover",
+  },
+
+  bellButton: {
+    position: "absolute",
+    top: 25,
+    right: 25,
+    padding: 8,
+  },
+
   grid: {
     flexDirection: "row",
     flexWrap: "wrap",
@@ -85,7 +107,8 @@ const styles = StyleSheet.create({
     fontSize: 14,
     textAlign: "center",
   },
+
   footer: {
-    marginTop: 60
-  }
+    marginTop: 60,
+  },
 });

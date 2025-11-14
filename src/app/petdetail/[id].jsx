@@ -14,7 +14,9 @@ export default function PetDetail() {
   const pet = pets.find((p) => p.id === id);
   const [photo, setPhoto] = useState(pet?.photo || "");
 
-  if (!pet) return <Text>Pet não encontrado</Text>;
+  if (!pet) 
+    return 
+  <Text>Pet não encontrado</Text>;
 
   const handlePickImage = async () => {
     const result = await ImagePicker.launchImageLibraryAsync({
@@ -30,7 +32,6 @@ export default function PetDetail() {
     }
   };
 
-  // ---- Função que calcula idade ----
   function calcularIdade(dataNascimento) {
     if (!dataNascimento) return "—";
 
@@ -49,7 +50,6 @@ export default function PetDetail() {
     ) {
       idade--;
     }
-
     return idade;
   }
 
@@ -233,6 +233,6 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
   },
   footer: {
-    top: 60,
+    top: 80,
   },
 });
