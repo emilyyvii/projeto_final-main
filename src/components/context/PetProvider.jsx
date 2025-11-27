@@ -1,56 +1,125 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import React, { createContext, useEffect, useState } from "react";
+import { createContext, useEffect, useState } from "react";
 
 export const PetContext = createContext();
 
-function generateId() {
-  return Date.now().toString();
-}
-
 export function PetProvider({ children }) {
-  const STORAGE_KEY = "fokus-pets";
-  const [pets, setPets] = useState([]);
-  const [ready, setReady] = useState(false);
+  const PETS_STORAGE_KEY = "fokus-pets";
 
+  const [pets, setPets] = useState([]);
+  const [isLoaded, setIsLoaded] = useState(false);
+
+  // 🔹 Carregar pets do storage
   useEffect(() => {
-    (async () => {
+    const getData = async () => {
       try {
-        const raw = await AsyncStorage.getItem(STORAGE_KEY);
-        if (raw) setPets(JSON.parse(raw));
+        const jsonValue = await AsyncStorage.getItem(PETS_STORAGE_KEY);
+        const loadedPets = jsonValue != null ? JSON.parse(jsonValue) : [];
+        setPets(loadedPets);
+        setIsLoaded(true);
       } catch (e) {
         console.log("Erro ao carregar pets:", e);
-      } finally {
-        setReady(true);
       }
-    })();
+    };
+    getData();
   }, []);
 
+  // 🔹 Salvar pets quando mudar
   useEffect(() => {
-    if (!ready) return;
-    AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(pets)).catch((e) =>
-      console.log("Erro ao salvar pets:", e)
-    );
-  }, [pets, ready]);
+    const storeData = async (value) => {
+      try {
+        const jsonValue = JSON.stringify(value);
+        await AsyncStorage.setItem(PETS_STORAGE_KEY, jsonValue);
+      } catch (e) {
+        console.log("Erro ao salvar pets:", e);
+      }
+    };
 
+    if (isLoaded) {
+      storeData(pets);
+    }
+  }, [pets]);
+
+  // 🔹 Adicionar pet
   const addPet = (newPet) => {
-    const petWithId = { ...newPet, id: generateId() };
-    setPets((old) => [...old, petWithId]);
-    return petWithId;
+    setPets((oldPets) => [
+      ...oldPets,
+      {
+        ...newPet,
+        id: Date.now().toString(),
+        code: Math.floor(100000 + Math.random() * 900000).toString(),
+        healthIssues: [],
+        food: { tipoRacao: "", quantidade: "", evitar: "" },
+        vaccines: [],
+        contact: { telefone: "", email: "" },
+        photo: "",
+      },
+    ]);
   };
 
-  const updatePet = (id, updated) => {
-    setPets((old) => old.map((p) => (p.id === id ? { ...p, ...updated } : p)));
+  // 🔹 Atualizar pet
+  const updatePet = (id, updatedData) => {
+    setPets((oldPets) =>
+      oldPets.map((p) => (p.id === id ? { ...p, ...updatedData } : p))
+    );
   };
 
-  const updatePetImage = (id, uri) => {
-    setPets((old) => old.map((p) => (p.id === id ? { ...p, photo: uri } : p)));
+  const updatePetImage = (id, newUri) => {
+    setPets((oldPets) =>
+      oldPets.map((p) => (p.id === id ? { ...p, photo: newUri } : p))
+    );
   };
 
   const deletePet = (id) => {
-    setPets((old) => old.filter((p) => p.id !== id));
+    setPets((oldPets) => oldPets.filter((p) => p.id !== id));
   };
 
-  const getPetById = (id) => pets.find((p) => p.id === id);
+  const getPetById = (id) => pets.find((pet) => pet.id === id);
+  const getPetByCode = (code) => pets.find((pet) => pet.code === code);
+
+  // 🔹 Health Issues
+  const getHealthIssues = (petId) =>
+    pets.find((p) => p.id === petId)?.healthIssues || [];
+
+  const updateHealthIssues = (petId, issues) => {
+    setPets((prev) =>
+      prev.map((p) => (p.id === petId ? { ...p, healthIssues: issues } : p))
+    );
+  };
+
+  // 🔹 Food
+  const getFood = (petId) =>
+    pets.find((p) => p.id === petId)?.food || {
+      tipoRacao: "",
+      quantidade: "",
+      evitar: "",
+    };
+
+  const updateFood = (petId, foodData) => {
+    setPets((prev) =>
+      prev.map((p) => (p.id === petId ? { ...p, food: foodData } : p))
+    );
+  };
+
+  // 🔹 Vaccines
+  const getVaccines = (petId) =>
+    pets.find((p) => p.id === petId)?.vaccines || [];
+
+  const updateVaccines = (petId, vaccines) => {
+    setPets((prev) =>
+      prev.map((p) => (p.id === petId ? { ...p, vaccines } : p))
+    );
+  };
+
+  // 🔹 Contact
+  const getContact = (petId) =>
+    pets.find((p) => p.id === petId)?.contact || { telefone: "", email: "" };
+
+  const updateContact = (petId, contactData) => {
+    setPets((prev) =>
+      prev.map((p) => (p.id === petId ? { ...p, contact: contactData } : p))
+    );
+  };
 
   return (
     <PetContext.Provider
@@ -58,10 +127,18 @@ export function PetProvider({ children }) {
         pets,
         addPet,
         updatePet,
-        updatePetImage,
         deletePet,
+        updatePetImage,
         getPetById,
-        ready,
+        getPetByCode,
+        getHealthIssues,
+        updateHealthIssues,
+        getFood,
+        updateFood,
+        getVaccines,
+        updateVaccines,
+        getContact,
+        updateContact,
       }}
     >
       {children}

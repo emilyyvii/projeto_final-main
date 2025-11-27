@@ -5,10 +5,10 @@ import { useRouter, useLocalSearchParams } from "expo-router";
 
 export default function VacinasScreen() {
   const router = useRouter();
+  const { readonly } = useLocalSearchParams();
 
-  const { tipo } = useLocalSearchParams(); 
-  const podeEditar = tipo === "dono"; 
-  const podeExcluir = tipo === "dono"; 
+  const podeEditar = readonly !== "true";
+  const podeExcluir = readonly !== "true";
 
   const [vacinas, setVacinas] = useState([]);
 
@@ -32,7 +32,6 @@ export default function VacinasScreen() {
 
   const renderItem = ({ item }) => (
     <View style={styles.row}>
-      {/* Nome da Vacina */}
       <TextInput
         style={[styles.cell, { flex: 2, color: "#fff" }]}
         placeholder="Nome da Vacina"
@@ -41,7 +40,6 @@ export default function VacinasScreen() {
         onChangeText={(t) => editarCampo(item.id, "nome", t)}
         editable={podeEditar}
       />
-      {/* Data */}
       <TextInput
         style={[styles.cell, { color: "#fff" }]}
         placeholder="Data"
@@ -50,7 +48,6 @@ export default function VacinasScreen() {
         onChangeText={(t) => editarCampo(item.id, "aplicacao", t)}
         editable={podeEditar}
       />
-      {/* Validade */}
       <TextInput
         style={[styles.cell, { color: "#fff" }]}
         placeholder="Validade"
@@ -59,7 +56,6 @@ export default function VacinasScreen() {
         onChangeText={(t) => editarCampo(item.id, "validade", t)}
         editable={podeEditar}
       />
-      {/* Lixeira (só aparece se pode excluir) */}
       {podeExcluir && (
         <TouchableOpacity onPress={() => excluirVacina(item.id)}>
           <Ionicons name="trash" size={22} color="#fff" style={styles.trash} />
@@ -70,7 +66,6 @@ export default function VacinasScreen() {
 
   return (
     <View style={styles.container}>
-      {/* Topo */}
       <View style={styles.header}>
         <Pressable onPress={() => router.back()}>
           <Ionicons name="arrow-back" size={28} color="#fdcb58" />
@@ -79,7 +74,6 @@ export default function VacinasScreen() {
       </View>
 
       <View style={styles.tableVaccine}>
-        {/* Cabeçalho */}
         <View style={[styles.row, styles.columTable]}>
           <Text style={[styles.cell, { flex: 2, fontWeight: "bold" }]}>Vacinas</Text>
           <Text style={[styles.cell, { fontWeight: "bold" }]}>Data</Text>
@@ -87,7 +81,6 @@ export default function VacinasScreen() {
           <View style={{ width: 30 }} />
         </View>
 
-        {/* Lista de Vacinas */}
         <FlatList
           data={vacinas}
           keyExtractor={(item) => item.id.toString()}
@@ -97,7 +90,6 @@ export default function VacinasScreen() {
           }
         />
 
-        {/* Botão + (apenas para o dono) */}
         {podeEditar && (
           <TouchableOpacity style={styles.addButton} onPress={addVacina}>
             <Ionicons name="add" size={28} color="#fdcb58" />

@@ -7,18 +7,18 @@ import {
   StyleSheet,
 } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
- 
-export default function HealthItem({ item, onEdit, onDelete }) {
+
+export default function HealthItem({ item, onEdit, onDelete, isReadOnly }) {
   const [isEditing, setIsEditing] = useState(false);
   const [editedText, setEditedText] = useState(item.text);
- 
+
   const handleSave = () => {
     if (editedText.trim()) {
       onEdit(item.id, editedText);
       setIsEditing(false);
     }
   };
- 
+
   return (
     <View style={styles.itemContainer}>
       {isEditing ? (
@@ -37,11 +37,25 @@ export default function HealthItem({ item, onEdit, onDelete }) {
         <View style={styles.row}>
           <Text style={styles.text}>{item.text}</Text>
           <View style={styles.actions}>
-            <TouchableOpacity onPress={() => setIsEditing(true)}>
-              <MaterialIcons name="edit" size={22} color="#002E9D" />
+            <TouchableOpacity
+              onPress={() => !isReadOnly && setIsEditing(true)}
+              style={{ opacity: isReadOnly ? 0.3 : 1 }}
+            >
+              <MaterialIcons
+                name="edit"
+                size={22}
+                color={isReadOnly ? "transparent" : "#002E9D"}
+              />
             </TouchableOpacity>
-            <TouchableOpacity onPress={() => onDelete(item.id)}>
-              <MaterialIcons name="delete" size={22} color="#E53935" />
+            <TouchableOpacity
+              onPress={() => !isReadOnly && onDelete(item.id)}
+              style={{ opacity: isReadOnly ? 0.3 : 1 }}
+            >
+              <MaterialIcons
+                name="delete"
+                size={22}
+                color={isReadOnly ? "transparent" : "#E53935"}
+              />
             </TouchableOpacity>
           </View>
         </View>
@@ -49,7 +63,7 @@ export default function HealthItem({ item, onEdit, onDelete }) {
     </View>
   );
 }
- 
+
 const styles = StyleSheet.create({
   itemContainer: {
     backgroundColor: "#f9f9f9",

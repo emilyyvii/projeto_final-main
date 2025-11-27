@@ -1,39 +1,91 @@
-import React, { useState, useEffect } from "react";
 import { useLocalSearchParams, router } from "expo-router";
-import { View, Text, Image, StyleSheet, Pressable } from "react-native";
+import { View, Text, Image, StyleSheet, Pressable, Alert } from "react-native";
 import usePetContext from "../../components/context/usePetContext";
 import { Ionicons } from "@expo/vector-icons";
 import RecordButton from "../../components/RecordButton";
 import Footer from "../../components/Footer";
 import * as ImagePicker from "expo-image-picker";
+import { useState } from "react";
 
 export default function PetDetail() {
   const { id, readonly } = useLocalSearchParams();
+
+  // 🔥 Profissional recebe readonly="true"
   const isReadOnly = readonly === "true";
 
-  const { pets, updatePetImage, getPetById } = usePetContext();
-  const pet = getPetById(id);
+  const { pets, updatePet, deletePet } = usePetContext();
+
+  const pet = pets.find((p) => p.id === id);
 
   const [photo, setPhoto] = useState(pet?.photo || "");
 
-  useEffect(() => setPhoto(pet?.photo || ""), [pet]);
-
-  if (!pet) return <Text style={{ padding: 20 }}>Pet não encontrado</Text>;
+  if (!pet)
+    return (
+      <View>
+        <Text>Pet não encontrado</Text>
+      </View>
+    );
 
   const handlePickImage = async () => {
-    if (isReadOnly) return;
+    if (isReadOnly)
+      return Alert.alert(
+        "Acesso Restrito",
+        "Apenas o dono pode alterar a foto do pet."
+      );
 
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: true,
-      quality: 0.8,
+      quality: 1,
     });
 
     if (!result.canceled) {
-      const uri = result.assets[0].uri;
-      setPhoto(uri);
-      updatePetImage(pet.id, uri);
+      const newUri = result.assets[0].uri;
+      setPhoto(newUri);
+      updatePet(pet.id, { photo: newUri });
     }
+  };
+
+  function calcularIdade(dataNascimento) {
+    if (!dataNascimento) return "—";
+
+    const [dia, mes, ano] = dataNascimento.split("/").map(Number);
+    const nascimento = new Date(ano, mes - 1, dia);
+    const hoje = new Date();
+
+    let idade = hoje.getFullYear() - nascimento.getFullYear();
+
+    if (
+      hoje.getMonth() < nascimento.getMonth() ||
+      (hoje.getMonth() === nascimento.getMonth() &&
+        hoje.getDate() < nascimento.getDate())
+    ) {
+      idade--;
+    }
+
+    return idade;
+  }
+
+  const idade = calcularIdade(pet.birthDate);
+
+  const handleDelete = () => {
+    if (isReadOnly)
+      return Alert.alert(
+        "Acesso Restrito",
+        "Apenas o dono pode excluir o pet."
+      );
+
+    Alert.alert("Excluir Pet", `Tem certeza que deseja excluir ${pet.name}?`, [
+      { text: "Cancelar", style: "cancel" },
+      {
+        text: "Excluir",
+        style: "destructive",
+        onPress: () => {
+          deletePet(pet.id);
+          router.replace("/mypets");
+        },
+      },
+    ]);
   };
 
   return (
@@ -43,7 +95,6 @@ export default function PetDetail() {
           <Ionicons name="arrow-back" size={28} color="#fdcb58" />
         </Pressable>
 
-        {/* FOTO – apenas isso fica bloqueado no modo readonly */}
         <Pressable onPress={handlePickImage} disabled={isReadOnly}>
           <Image
             source={photo ? { uri: photo } : require("@/assets/imagens/1.png")}
@@ -55,37 +106,62 @@ export default function PetDetail() {
 
         <View style={styles.ageBox}>
           <Text style={styles.age}>{pet.breed}</Text>
-          <Text style={styles.age}>{pet.age} anos</Text>
+          <Text style={styles.age}>{idade} anos</Text>
         </View>
       </View>
 
       <View style={styles.containerButton}>
         <Text style={styles.text}>Ficha do Animal</Text>
-        <View style={styles.grid}>
-          <RecordButton
-            title={"Contato"}
-            onPress={() => router.navigate("/contact")}
-          />
 
+        <View style={styles.grid}>
+
+          {/* 🔥 Agora passa readonly corretamente */}
           <RecordButton
-            title={"Problemas de Saúde"}
+            title="Contato"
             onPress={() =>
-              router.push({ pathname: "/health", params: { petId: String(pet.id) } })
+              router.push({
+                pathname: "/contact",
+                params: { readonly: String(isReadOnly) },
+              })
             }
           />
 
           <RecordButton
-            title={"Vacinas"}
-            onPress={() => router.navigate("/vaccine")}
+            title="Problemas de Saúde"
+            onPress={() =>
+              router.push({
+                pathname: "/health",
+                params: { petId: String(pet.id), readonly: String(isReadOnly) },
+              })
+            }
           />
 
           <RecordButton
-            title={"Alimentação"}
+            title="Vacinas"
             onPress={() =>
-              router.push({ pathname: "/food", params: { petId: String(pet.id) } })
+              router.push({
+                pathname: "/vaccine",
+                params: { readonly: String(isReadOnly) },
+              })
+            }
+          />
+
+          <RecordButton
+            title="Alimentação"
+            onPress={() =>
+              router.push({
+                pathname: "/food",
+                params: { petId: String(pet.id), readonly: String(isReadOnly) },
+              })
             }
           />
         </View>
+
+        {!isReadOnly && (
+          <Pressable style={styles.deleteButton} onPress={handleDelete}>
+            <Text style={styles.deleteText}>Excluir Pet</Text>
+          </Pressable>
+        )}
       </View>
 
       <View style={styles.footer}>
@@ -96,7 +172,12 @@ export default function PetDetail() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#141496", alignItems: "center", paddingTop: 10 },
+  container: {
+    flex: 1,
+    backgroundColor: "#141496",
+    alignItems: "center",
+    paddingTop: 10,
+  },
   containerInfo: {
     backgroundColor: "#2e63ce",
     borderRadius: 16,
@@ -107,7 +188,13 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     position: "relative",
   },
-  arrowBack: { position: "absolute", top: 15, left: 15, zIndex: 10, padding: 5 },
+  arrowBack: {
+    position: "absolute",
+    top: 15,
+    left: 15,
+    zIndex: 10,
+    padding: 5,
+  },
   image: {
     width: 150,
     height: 150,
@@ -117,8 +204,19 @@ const styles = StyleSheet.create({
     borderWidth: 4,
     borderColor: "#fff",
   },
-  name: { fontSize: 28, fontWeight: "bold", textAlign: "center", color: "#fff", marginTop: 15 },
-  ageBox: { flexDirection: "row", justifyContent: "center", marginVertical: 15, gap: 15 },
+  name: {
+    fontSize: 28,
+    fontWeight: "bold",
+    textAlign: "center",
+    color: "#fff",
+    marginTop: 15,
+  },
+  ageBox: {
+    flexDirection: "row",
+    justifyContent: "center",
+    marginVertical: 15,
+    gap: 15,
+  },
   age: {
     backgroundColor: "#5B8DEE",
     color: "#fff",
@@ -150,6 +248,26 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     marginBottom: 20,
   },
-  grid: { flexDirection: "row", flexWrap: "wrap", justifyContent: "space-between", gap: 13 },
-  footer: { top: 60 },
+  grid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "space-between",
+    gap: 13,
+  },
+  deleteButton: {
+    marginTop: 25,
+    backgroundColor: "#ff4d4d",
+    paddingVertical: 14,
+    borderRadius: 12,
+    top: 10,
+  },
+  deleteText: {
+    color: "#fff",
+    textAlign: "center",
+    fontSize: 18,
+    fontWeight: "bold",
+  },
+  footer: {
+    top: 80,
+  },
 });

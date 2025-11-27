@@ -6,7 +6,9 @@ import { useState, useEffect } from "react";
 import usePetContext from "../../components/context/usePetContext";
 
 export default function Food() {
-  const { petId } = useLocalSearchParams(); 
+  const { petId, readonly } = useLocalSearchParams(); // 🔥 receber readonly
+  const isReadOnly = readonly === "true";
+
   const { pets } = usePetContext();
   const pet = pets.find((p) => String(p.id) === String(petId));
 
@@ -14,7 +16,7 @@ export default function Food() {
   const [quantidade, setQuantidade] = useState("");
   const [evitar, setEvitar] = useState("");
 
-  const STORAGE_KEY = `@food_data_${petId}`; 
+  const STORAGE_KEY = `@food_data_${petId}`;
 
   // Carrega dados do pet específico
   useEffect(() => {
@@ -37,6 +39,7 @@ export default function Food() {
 
   // Salva automaticamente ao alterar campos
   useEffect(() => {
+    if (isReadOnly) return; // 🔥 não salvar se for readonly
     const saveData = async () => {
       if (!petId) return;
       try {
@@ -49,10 +52,11 @@ export default function Food() {
       }
     };
     saveData();
-  }, [tipoRacao, quantidade, evitar, petId]);
+  }, [tipoRacao, quantidade, evitar, petId, isReadOnly]);
 
   // Limpa campo individual
   const limparCampo = (campo) => {
+    if (isReadOnly) return; // 🔥 não limpar se for readonly
     if (campo === "tipoRacao") setTipoRacao("");
     if (campo === "quantidade") setQuantidade("");
     if (campo === "evitar") setEvitar("");
@@ -92,10 +96,15 @@ export default function Food() {
               placeholder="Informe o tipo de ração"
               placeholderTextColor="#fff"
               value={tipoRacao}
-              onChangeText={setTipoRacao}
+              onChangeText={isReadOnly ? undefined : setTipoRacao} // 🔥 bloqueio edição
+              editable={!isReadOnly} // 🔥 readonly bloqueia input
             />
-            <Pressable onPress={() => limparCampo("tipoRacao")}>
-              <Ionicons name="trash" size={22} color="#fff" />
+            <Pressable onPress={() => limparCampo("tipoRacao")} disabled={isReadOnly}>
+              <Ionicons
+                name="trash"
+                size={22}
+                color={isReadOnly ? "#999" : "#fff"} // 🔥 ícone cinza se readonly
+              />
             </Pressable>
           </View>
 
@@ -105,10 +114,15 @@ export default function Food() {
               placeholder="Informe a quantidade diária"
               placeholderTextColor="#fff"
               value={quantidade}
-              onChangeText={setQuantidade}
+              onChangeText={isReadOnly ? undefined : setQuantidade}
+              editable={!isReadOnly}
             />
-            <Pressable onPress={() => limparCampo("quantidade")}>
-              <Ionicons name="trash" size={22} color="#fff" />
+            <Pressable onPress={() => limparCampo("quantidade")} disabled={isReadOnly}>
+              <Ionicons
+                name="trash"
+                size={22}
+                color={isReadOnly ? "#999" : "#fff"}
+              />
             </Pressable>
           </View>
         </View>
@@ -121,10 +135,15 @@ export default function Food() {
               placeholder="Informe os alimentos a evitar"
               placeholderTextColor="#fff"
               value={evitar}
-              onChangeText={setEvitar}
+              onChangeText={isReadOnly ? undefined : setEvitar}
+              editable={!isReadOnly}
             />
-            <Pressable onPress={() => limparCampo("evitar")}>
-              <Ionicons name="trash" size={22} color="#fff" />
+            <Pressable onPress={() => limparCampo("evitar")} disabled={isReadOnly}>
+              <Ionicons
+                name="trash"
+                size={22}
+                color={isReadOnly ? "#999" : "#fff"}
+              />
             </Pressable>
           </View>
         </View>
