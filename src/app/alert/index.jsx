@@ -1,23 +1,29 @@
-import { useEffect, useState } from "react";
-import { View, Text, Image, StyleSheet, ScrollView } from "react-native";
+import { useEffect, useState, useRef } from "react";
+import {
+  View,
+  Text,
+  Image,
+  StyleSheet,
+  ScrollView,
+  Pressable,
+} from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import usePetContext from "../../components/context/usePetContext";
- 
-export default function Notifications() {
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
-  const { pets } = usePetContext(); 
-  const petPhoto = pets[0]?.photo; 
-  const petName = pets[0]?.name || "Seu pet";
+export default function Notifications() {
+  const { pets } = usePetContext();
+  const petPhoto = pets[0]?.photo;
+
   const [notifications, setNotifications] = useState([]);
+
+  const notificationsRef = useRef([]);
+
   const simulatedAlerts = [
     {
       title: "Bateria da Tag Baixa",
       text: "Atenção: A bateria da tag está em 10%. Recarregue em breve.",
-    },
-    {
-      title: "Pet Encontrado (via QR Code)",
-      text: "Alguém escaneou o QR Code do pet às 17:45.",
     },
     {
       title: "Alerta de Saúde",
@@ -28,53 +34,95 @@ export default function Notifications() {
       text: "Movimentação incomum detectada às 03:00. Verifique o local.",
     },
   ];
+
   useEffect(() => {
+    async function loadData() {
+      const saved = await AsyncStorage.getItem("alert_list");
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        notificationsRef.current = parsed;
+        setNotifications(parsed);
+      }
+    }
+    loadData();
+  }, []);
+
+  useEffect(() => {
+    if (!petPhoto) return;
+
     let index = 0;
-    const interval = setInterval(() => {
+
+    const interval = setInterval(async () => {
       if (index < simulatedAlerts.length) {
-        setNotifications((prev) => [
-          ...prev,
-          { ...simulatedAlerts[index], photo: petPhoto },
-        ]);
+        const newAlert = {
+          ...simulatedAlerts[index],
+          id: Date.now() + index,
+          photo: petPhoto,
+        };
+
+        notificationsRef.current = [...notificationsRef.current, newAlert];
+
+        setNotifications([...notificationsRef.current]);
+
+        await AsyncStorage.setItem(
+          "alert_list",
+          JSON.stringify(notificationsRef.current)
+        );
+
         index++;
       }
     }, 2000);
+
     return () => clearInterval(interval);
   }, [petPhoto]);
 
+  const clearAlerts = async () => {
+    notificationsRef.current = [];
+    setNotifications([]);
+    await AsyncStorage.removeItem("alert_list");
+  };
+
   return (
-<View style={styles.container}>
-    <View style={styles.header}>
+    <View style={styles.container}>
+      <View style={styles.header}>
         <Ionicons
-            name="arrow-back"
-            size={28}
-            color="#fff"
-            onPress={() => router.back()}
+          name="arrow-back"
+          size={28}
+          color="#f4c44e"
+          onPress={() => router.back()}
         />
         <Text style={styles.headerTitle}>Notificações de Alertas</Text>
-    </View>
- 
-    <ScrollView contentContainerStyle={styles.content}>
+      </View>
+
+      <ScrollView contentContainerStyle={styles.content}>
         <View style={styles.iconContainer}>
-            <Ionicons name="warning" size={80} color="#1e1c89" />
-        </View>{notifications.map((n, index) => (
-        <View key={index} style={styles.notification}>
-            <Image
-                source={{ uri: n.photo }}
-                style={styles.photo}
-            />
-            <View style={{ flex: 1 }}>
-                <Text style={styles.title}>{n.title}</Text>
-                <Text style={styles.text}>{n.text}</Text>
-            </View>
+          <Ionicons name="warning" size={80} color="#1e1c89" />
         </View>
+
+        {notifications.length > 0 && (
+          <Pressable style={styles.clearBtn} onPress={clearAlerts}>
+            <Ionicons name="trash" size={16} color="#fff" />
+            <Text style={styles.clearText}>Limpar cachê</Text>
+          </Pressable>
+        )}
+
+        {notifications.map((n) => (
+          <View key={n.id} style={styles.notification}>
+            <Image source={{ uri: n.photo }} style={styles.photo} />
+
+            <View style={{ flex: 1 }}>
+              <Text style={styles.title}>{n.title}</Text>
+              <Text style={styles.text}>{n.text}</Text>
+            </View>
+          </View>
         ))}
-    </ScrollView>
-</View>
+      </ScrollView>
+    </View>
   );
 }
+
 const styles = StyleSheet.create({
-    container: {
+  container: {
     flex: 1,
     backgroundColor: "#f4c44e",
   },
@@ -83,6 +131,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     backgroundColor: "#1e1c89",
     padding: 15,
+    height: 80
   },
   headerTitle: {
     color: "#fff",
@@ -90,13 +139,33 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     marginLeft: 10,
   },
+
   content: {
     padding: 20,
+    flexGrow: 1, 
   },
+
   iconContainer: {
     alignItems: "center",
     marginBottom: 20,
   },
+
+  clearBtn: {
+    flexDirection: "row",
+    backgroundColor: "#c62828",
+    paddingVertical: 7,
+    paddingHorizontal: 15,
+    borderRadius: 10,
+    alignSelf: "flex-end",
+    marginBottom: 15,
+    alignItems: "center",
+  },
+  clearText: {
+    color: "#fff",
+    fontWeight: "bold",
+    marginLeft: 5,
+  },
+
   notification: {
     flexDirection: "row",
     backgroundColor: "#1e1c89",
@@ -111,7 +180,6 @@ const styles = StyleSheet.create({
     borderRadius: 30,
     marginRight: 15,
   },
-
   title: {
     fontSize: 15,
     fontWeight: "bold",
@@ -123,5 +191,3 @@ const styles = StyleSheet.create({
     marginTop: 3,
   },
 });
-
- 
