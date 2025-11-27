@@ -1,3 +1,4 @@
+import React, { useState, useEffect } from "react";
 import { useLocalSearchParams, router } from "expo-router";
 import { View, Text, Image, StyleSheet, Pressable } from "react-native";
 import usePetContext from "../../components/context/usePetContext";
@@ -5,51 +6,53 @@ import { Ionicons } from "@expo/vector-icons";
 import RecordButton from "../../components/RecordButton";
 import Footer from "../../components/Footer";
 import * as ImagePicker from "expo-image-picker";
-import { useState } from "react";
 
 export default function PetDetail() {
-  const { id } = useLocalSearchParams();
-  const { pets, updatePetImage } = usePetContext(); // 👈 usa só updatePetImage
+  const { id, readonly } = useLocalSearchParams();
+  const isReadOnly = readonly === "true";
 
-  const pet = pets.find((p) => p.id === id);
+  const { pets, updatePetImage, getPetById } = usePetContext();
+  const pet = getPetById(id);
+
   const [photo, setPhoto] = useState(pet?.photo || "");
 
-  if (!pet) return <Text>Pet não encontrado</Text>;
+  useEffect(() => setPhoto(pet?.photo || ""), [pet]);
 
-  // Escolher imagem da galeria
+  if (!pet) return <Text style={{ padding: 20 }}>Pet não encontrado</Text>;
+
   const handlePickImage = async () => {
+    if (isReadOnly) return;
+
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: true,
-      quality: 1,
+      quality: 0.8,
     });
 
     if (!result.canceled) {
-      const newUri = result.assets[0].uri;
-      setPhoto(newUri);
-      updatePetImage(pet.id, newUri); // 👈 atualiza só a imagem
+      const uri = result.assets[0].uri;
+      setPhoto(uri);
+      updatePetImage(pet.id, uri);
     }
   };
 
   return (
     <View style={styles.container}>
       <View style={styles.containerInfo}>
-        <Pressable
-          style={styles.arrowBack}
-          onPress={() => router.navigate("/mypets")}
-        >
+        <Pressable style={styles.arrowBack} onPress={() => router.back()}>
           <Ionicons name="arrow-back" size={28} color="#fdcb58" />
         </Pressable>
 
-        {/* FOTO */}
-        <Pressable onPress={handlePickImage}>
-          <Image source={{ uri: photo }} style={styles.image} />
+        {/* FOTO – apenas isso fica bloqueado no modo readonly */}
+        <Pressable onPress={handlePickImage} disabled={isReadOnly}>
+          <Image
+            source={photo ? { uri: photo } : require("@/assets/imagens/1.png")}
+            style={[styles.image, isReadOnly && { opacity: 0.6 }]}
+          />
         </Pressable>
 
-        {/* Nome (fixo) */}
         <Text style={styles.name}>{pet.name}</Text>
 
-        {/* Raça e Idade (somente exibição) */}
         <View style={styles.ageBox}>
           <Text style={styles.age}>{pet.breed}</Text>
           <Text style={styles.age}>{pet.age} anos</Text>
@@ -63,16 +66,19 @@ export default function PetDetail() {
             title={"Contato"}
             onPress={() => router.navigate("/contact")}
           />
+
           <RecordButton
             title={"Problemas de Saúde"}
             onPress={() =>
               router.push({ pathname: "/health", params: { petId: String(pet.id) } })
             }
           />
+
           <RecordButton
             title={"Vacinas"}
             onPress={() => router.navigate("/vaccine")}
           />
+
           <RecordButton
             title={"Alimentação"}
             onPress={() =>
@@ -81,20 +87,16 @@ export default function PetDetail() {
           />
         </View>
       </View>
-    <View style={styles.footer}>
-      <Footer text="Apaixonados por animais" textColor="#fff" showImage={false} />
-    </View>
+
+      <View style={styles.footer}>
+        <Footer text="Apaixonados por animais" textColor="#fff" showImage={false} />
+      </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#141496",
-    alignItems: "center",
-    paddingTop: 10,
-  },
+  container: { flex: 1, backgroundColor: "#141496", alignItems: "center", paddingTop: 10 },
   containerInfo: {
     backgroundColor: "#2e63ce",
     borderRadius: 16,
@@ -105,13 +107,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     position: "relative",
   },
-  arrowBack: {
-    position: "absolute",
-    top: 15,
-    left: 15,
-    zIndex: 10,
-    padding: 5,
-  },
+  arrowBack: { position: "absolute", top: 15, left: 15, zIndex: 10, padding: 5 },
   image: {
     width: 150,
     height: 150,
@@ -121,19 +117,8 @@ const styles = StyleSheet.create({
     borderWidth: 4,
     borderColor: "#fff",
   },
-  name: {
-    fontSize: 28,
-    fontWeight: "bold",
-    textAlign: "center",
-    color: "#fff",
-    marginTop: 15,
-  },
-  ageBox: {
-    flexDirection: "row",
-    justifyContent: "center",
-    marginVertical: 15,
-    gap: 15,
-  },
+  name: { fontSize: 28, fontWeight: "bold", textAlign: "center", color: "#fff", marginTop: 15 },
+  ageBox: { flexDirection: "row", justifyContent: "center", marginVertical: 15, gap: 15 },
   age: {
     backgroundColor: "#5B8DEE",
     color: "#fff",
@@ -165,13 +150,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     marginBottom: 20,
   },
-  grid: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    justifyContent: "space-between",
-    gap: 13,
-  },
-  footer: {
-    top: 60
-  }
+  grid: { flexDirection: "row", flexWrap: "wrap", justifyContent: "space-between", gap: 13 },
+  footer: { top: 60 },
 });

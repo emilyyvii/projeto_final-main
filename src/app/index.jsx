@@ -14,7 +14,7 @@ export default function Index() {
 
     <TouchableOpacity
       style={styles.button}
-      onPress={() => router.navigate("/mypets")}
+      onPress={() => router.navigate("/verify")}
     >
       <Text style={styles.title}>PROFISSIONAL</Text>
     </TouchableOpacity>
