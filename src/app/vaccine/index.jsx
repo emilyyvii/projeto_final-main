@@ -1,66 +1,99 @@
-import React, { useState } from "react";
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, FlatList, Pressable } from "react-native";
+import React, { useState, useEffect } from "react";
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  StyleSheet,
+  FlatList,
+  Pressable,
+} from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter, useLocalSearchParams } from "expo-router";
 
 export default function VacinasScreen() {
   const router = useRouter();
+  const { readonly, petId } = useLocalSearchParams();
+  const isReadOnly = readonly === "true";
 
-  const { tipo } = useLocalSearchParams(); 
-  const podeEditar = tipo === "dono"; 
-  const podeExcluir = tipo === "dono"; 
+  const STORAGE_KEY = `@vacinas_${petId}`;
 
   const [vacinas, setVacinas] = useState([]);
 
+  // Carrega vacinas do AsyncStorage ao iniciar
+  useEffect(() => {
+    const loadVacinas = async () => {
+      if (!petId) return;
+      try {
+        const saved = await AsyncStorage.getItem(STORAGE_KEY);
+        if (saved) setVacinas(JSON.parse(saved));
+      } catch (err) {
+        console.log("Erro ao carregar vacinas:", err);
+      }
+    };
+    loadVacinas();
+  }, [petId]);
+
+  // Salva vacinas automaticamente sempre que vacinas mudarem (só dono)
+  useEffect(() => {
+    if (isReadOnly) return;
+    const saveVacinas = async () => {
+      try {
+        await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(vacinas));
+      } catch (err) {
+        console.log("Erro ao salvar vacinas:", err);
+      }
+    };
+    saveVacinas();
+  }, [vacinas, isReadOnly]);
+
+  // Funções de adicionar, editar e excluir
   const addVacina = () => {
-    if (!podeEditar) return;
+    if (isReadOnly) return;
     const nova = { id: Date.now(), nome: "", aplicacao: "", validade: "" };
-    setVacinas([...vacinas, nova]);
+    setVacinas((prev) => [...prev, nova]);
   };
 
   const editarCampo = (id, campo, valor) => {
-    if (!podeEditar) return;
-    setVacinas(
-      vacinas.map((v) => (v.id === id ? { ...v, [campo]: valor } : v))
+    if (isReadOnly) return;
+    setVacinas((prev) =>
+      prev.map((v) => (v.id === id ? { ...v, [campo]: valor } : v))
     );
   };
 
   const excluirVacina = (id) => {
-    if (!podeExcluir) return;
-    setVacinas(vacinas.filter((v) => v.id !== id));
+    if (isReadOnly) return;
+    setVacinas((prev) => prev.filter((v) => v.id !== id));
   };
 
   const renderItem = ({ item }) => (
     <View style={styles.row}>
-      {/* Nome da Vacina */}
       <TextInput
-        style={[styles.cell, { flex: 2, color: "#fff" }]}
+        style={[styles.cell, { flex: 2, color: isReadOnly ? "#ccc" : "#fff" }]}
         placeholder="Nome da Vacina"
-        placeholderTextColor="#ddd"
+        placeholderTextColor={isReadOnly ? "#999" : "#ddd"}
         value={item.nome}
         onChangeText={(t) => editarCampo(item.id, "nome", t)}
-        editable={podeEditar}
+        editable={!isReadOnly}
       />
-      {/* Data */}
       <TextInput
-        style={[styles.cell, { color: "#fff" }]}
+        style={[styles.cell, { color: isReadOnly ? "#ccc" : "#fff" }]}
         placeholder="Data"
-        placeholderTextColor="#ddd"
+        placeholderTextColor={isReadOnly ? "#999" : "#ddd"}
         value={item.aplicacao}
         onChangeText={(t) => editarCampo(item.id, "aplicacao", t)}
-        editable={podeEditar}
+        editable={!isReadOnly}
       />
-      {/* Validade */}
       <TextInput
-        style={[styles.cell, { color: "#fff" }]}
+        style={[styles.cell, { color: isReadOnly ? "#ccc" : "#fff" }]}
         placeholder="Validade"
-        placeholderTextColor="#ddd"
+        placeholderTextColor={isReadOnly ? "#999" : "#ddd"}
         value={item.validade}
         onChangeText={(t) => editarCampo(item.id, "validade", t)}
-        editable={podeEditar}
+        editable={!isReadOnly}
       />
-      {/* Lixeira (só aparece se pode excluir) */}
-      {podeExcluir && (
+      {!isReadOnly && (
         <TouchableOpacity onPress={() => excluirVacina(item.id)}>
           <Ionicons name="trash" size={22} color="#fff" style={styles.trash} />
         </TouchableOpacity>
@@ -70,7 +103,6 @@ export default function VacinasScreen() {
 
   return (
     <View style={styles.container}>
-      {/* Topo */}
       <View style={styles.header}>
         <Pressable onPress={() => router.back()}>
           <Ionicons name="arrow-back" size={28} color="#fdcb58" />
@@ -79,7 +111,6 @@ export default function VacinasScreen() {
       </View>
 
       <View style={styles.tableVaccine}>
-        {/* Cabeçalho */}
         <View style={[styles.row, styles.columTable]}>
           <Text style={[styles.cell, { flex: 2, fontWeight: "bold" }]}>Vacinas</Text>
           <Text style={[styles.cell, { fontWeight: "bold" }]}>Data</Text>
@@ -87,7 +118,6 @@ export default function VacinasScreen() {
           <View style={{ width: 30 }} />
         </View>
 
-        {/* Lista de Vacinas */}
         <FlatList
           data={vacinas}
           keyExtractor={(item) => item.id.toString()}
@@ -97,8 +127,7 @@ export default function VacinasScreen() {
           }
         />
 
-        {/* Botão + (apenas para o dono) */}
-        {podeEditar && (
+        {!isReadOnly && (
           <TouchableOpacity style={styles.addButton} onPress={addVacina}>
             <Ionicons name="add" size={28} color="#fdcb58" />
           </TouchableOpacity>
@@ -109,10 +138,7 @@ export default function VacinasScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#fdcb58",
-  },
+  container: { flex: 1, backgroundColor: "#fdcb58" },
   header: {
     flexDirection: "row",
     alignItems: "center",
@@ -121,56 +147,12 @@ const styles = StyleSheet.create({
     paddingBottom: 15,
     paddingHorizontal: 20,
   },
-  headerTitle: {
-    color: "#fff",
-    fontSize: 20,
-    fontWeight: "bold",
-    marginLeft: 10,
-  },
-  tableVaccine: {
-    marginTop: 50,
-    width: "90%",
-    justifyContent: "center",
-    alignSelf: "center",
-  },
-  columTable: {
-    backgroundColor: "#141496",
-  },
-  row: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "#2e63ce",
-    borderRadius: 10,
-    marginVertical: 4,
-    paddingHorizontal: 8,
-    paddingVertical: 6,
-  },
-  cell: {
-    flex: 1,
-    color: "#fff",
-    fontSize: 14,
-    paddingHorizontal: 4,
-    paddingVertical: 10,
-  },
-  trash: {
-    padding: 6,
-  },
-  addButton: {
-    backgroundColor: "#141496",
-    width: 45,
-    height: 45,
-    borderRadius: 50,
-    alignItems: "center",
-    justifyContent: "center",
-    alignSelf: "center",
-    marginTop: 20,
-    shadowColor: "#000",
-    shadowOpacity: 0.2,
-    shadowRadius: 3,
-  },
-  emptyText: {
-    textAlign: "center",
-    color: "#002E9D",
-    marginTop: 10,
-  },
+  headerTitle: { color: "#fff", fontSize: 20, fontWeight: "bold", marginLeft: 10 },
+  tableVaccine: { marginTop: 50, width: "90%", justifyContent: "center", alignSelf: "center" },
+  columTable: { backgroundColor: "#141496" },
+  row: { flexDirection: "row", alignItems: "center", backgroundColor: "#2e63ce", borderRadius: 10, marginVertical: 4, paddingHorizontal: 8, paddingVertical: 6 },
+  cell: { flex: 1, fontSize: 14, paddingHorizontal: 4, paddingVertical: 10 },
+  trash: { padding: 6 },
+  addButton: { backgroundColor: "#141496", width: 45, height: 45, borderRadius: 50, alignItems: "center", justifyContent: "center", alignSelf: "center", marginTop: 20, shadowColor: "#000", shadowOpacity: 0.2, shadowRadius: 3 },
+  emptyText: { textAlign: "center", color: "#002E9D", marginTop: 10 },
 });

@@ -1,22 +1,31 @@
 import { useState, useEffect } from "react";
-import {View, Text, StyleSheet, TextInput, Pressable, Keyboard,} from "react-native";
+import {
+  View,
+  Text,
+  StyleSheet,
+  TextInput,
+  Pressable,
+  Keyboard,
+} from "react-native";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { MaterialIcons, Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
- 
+
 const KEY_TELEFONE = "@contact_telefone";
 const KEY_EMAIL = "@contact_email";
- 
+
 export default function Contact() {
   const router = useRouter();
-  const { tipo } = useLocalSearchParams();
-  const podeEditar = tipo === "dono";
- 
+  const { readonly } = useLocalSearchParams(); // vai receber "true" ou "false"
+
+  // 🔥 Se readonly === "true", ninguém pode editar
+  const isReadOnly = readonly === "true";
+
   const [telefone, setTelefone] = useState("");
   const [email, setEmail] = useState("");
   const [editandoTelefone, setEditandoTelefone] = useState(false);
   const [editandoEmail, setEditandoEmail] = useState(false);
- 
+
   useEffect(() => {
     (async () => {
       try {
@@ -29,7 +38,7 @@ export default function Contact() {
       }
     })();
   }, []);
- 
+
   const saveToStorage = async (key, value) => {
     try {
       await AsyncStorage.setItem(key, value ?? "");
@@ -37,9 +46,10 @@ export default function Contact() {
       console.warn("Erro ao salvar:", err);
     }
   };
- 
+
   const toggleEditTelefone = () => {
-    if (!podeEditar) return;
+    if (isReadOnly) return;
+
     const novo = !editandoTelefone;
     if (editandoTelefone && !novo) {
       saveToStorage(KEY_TELEFONE, telefone);
@@ -47,9 +57,10 @@ export default function Contact() {
     }
     setEditandoTelefone(novo);
   };
- 
+
   const toggleEditEmail = () => {
-    if (!podeEditar) return;
+    if (isReadOnly) return;
+
     const novo = !editandoEmail;
     if (editandoEmail && !novo) {
       saveToStorage(KEY_EMAIL, email);
@@ -57,7 +68,7 @@ export default function Contact() {
     }
     setEditandoEmail(novo);
   };
- 
+
   return (
     <View style={styles.container}>
       <View style={styles.header}>
@@ -66,20 +77,28 @@ export default function Contact() {
         </Pressable>
         <Text style={styles.headerTitle}>Informações de contato</Text>
       </View>
- 
+
       <View style={styles.Content}>
+        {/* TELEFONE */}
         <View style={styles.infoBox}>
           <View style={styles.infoHeader}>
             <Text style={styles.label}>Número de telefone</Text>
-            {podeEditar && (
-              <Pressable onPress={toggleEditTelefone}>
-                <MaterialIcons name="edit" size={22} color="#F7C843" />
-              </Pressable>
-            )}
+            <Pressable
+              onPress={toggleEditTelefone}
+              disabled={isReadOnly}
+              style={{ opacity: isReadOnly ? 0.3 : 1 }}
+            >
+              <MaterialIcons
+                name="edit"
+                size={22}
+                color={isReadOnly ? "transparent" : "#F7C843"}
+              />
+            </Pressable>
           </View>
-          {editandoTelefone && podeEditar ? (
+
+          {editandoTelefone && !isReadOnly ? (
             <TextInput
-              style={styles.input}
+              style={[styles.input]}
               placeholder="Digite o novo número..."
               placeholderTextColor="#999"
               value={telefone}
@@ -91,20 +110,27 @@ export default function Contact() {
             <Text style={styles.value}>{telefone || "—"}</Text>
           )}
         </View>
- 
-        {/* Email */}
+
+        {/* EMAIL */}
         <View style={styles.infoBox}>
           <View style={styles.infoHeader}>
             <Text style={styles.label}>E-mail</Text>
-            {podeEditar && (
-              <Pressable onPress={toggleEditEmail}>
-               <MaterialIcons name="edit" size={22} color="#F7C843" />
-              </Pressable>
-            )}
+            <Pressable
+              onPress={toggleEditEmail}
+              disabled={isReadOnly}
+              style={{ opacity: isReadOnly ? 0.3 : 1 }}
+            >
+              <MaterialIcons
+                name="edit"
+                size={22}
+                color={isReadOnly ? "transparent" : "#F7C843"}
+              />
+            </Pressable>
           </View>
-          {editandoEmail && podeEditar ? (
+
+          {editandoEmail && !isReadOnly ? (
             <TextInput
-              style={styles.input}
+              style={[styles.input]}
               placeholder="Digite o novo e-mail..."
               placeholderTextColor="#999"
               value={email}
@@ -122,7 +148,7 @@ export default function Contact() {
     </View>
   );
 }
- 
+
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#F7C843" },
   header: {
@@ -139,23 +165,18 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     marginLeft: 10,
   },
- 
-  bannerText: { color: "#fff", fontSize: 14 },
   Content: { marginTop: 40 },
   infoBox: {
     backgroundColor: "#142A8C",
     borderRadius: 14,
     padding: 16,
     marginBottom: 20,
-    justifyContent: "center",
     width: "90%",
     alignSelf: "center",
   },
- 
   infoHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
-    alignItems: "center",
     marginBottom: 6,
   },
   label: { color: "#fdcb58", fontSize: 16, fontWeight: "bold" },

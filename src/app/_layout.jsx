@@ -6,7 +6,12 @@ export default function Layout() {
   return (
     <PetProvider>
       <HealthProvider>
-        <Stack screenOptions={{ headerShown: false }} />
+        <Stack screenOptions={{ headerShown: false }}>
+
+          {/* 👇 IMPORTANTE: permite abrir o verify pelo QR */}
+          <Stack.Screen name="verify" options={{ presentation: "modal" }} />
+
+        </Stack>
       </HealthProvider>
     </PetProvider>
   );

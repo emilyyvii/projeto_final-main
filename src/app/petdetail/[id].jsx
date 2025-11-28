@@ -1,5 +1,5 @@
 import { useLocalSearchParams, router } from "expo-router";
-import { View, Text, Image, StyleSheet, Pressable } from "react-native";
+import { View, Text, Image, StyleSheet, Pressable, Alert } from "react-native";
 import usePetContext from "../../components/context/usePetContext";
 import { Ionicons } from "@expo/vector-icons";
 import RecordButton from "../../components/RecordButton";
@@ -8,16 +8,31 @@ import * as ImagePicker from "expo-image-picker";
 import { useState } from "react";
 
 export default function PetDetail() {
-  const { id } = useLocalSearchParams();
-  const { pets, updatePetImage } = usePetContext(); // 👈 usa só updatePetImage
+  const { id, readonly } = useLocalSearchParams();
+
+  // 🔥 Profissional recebe readonly="true"
+  const isReadOnly = readonly === "true";
+
+  const { pets, updatePet, deletePet } = usePetContext();
 
   const pet = pets.find((p) => p.id === id);
+
   const [photo, setPhoto] = useState(pet?.photo || "");
 
-  if (!pet) return <Text>Pet não encontrado</Text>;
+  if (!pet)
+    return (
+      <View>
+        <Text>Pet não encontrado</Text>
+      </View>
+    );
 
-  // Escolher imagem da galeria
   const handlePickImage = async () => {
+    if (isReadOnly)
+      return Alert.alert(
+        "Acesso Restrito",
+        "Apenas o dono pode alterar a foto do pet."
+      );
+
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: true,
@@ -27,63 +42,131 @@ export default function PetDetail() {
     if (!result.canceled) {
       const newUri = result.assets[0].uri;
       setPhoto(newUri);
-      updatePetImage(pet.id, newUri); // 👈 atualiza só a imagem
+      updatePet(pet.id, { photo: newUri });
     }
+  };
+
+  function calcularIdade(dataNascimento) {
+    if (!dataNascimento) return "—";
+
+    const [dia, mes, ano] = dataNascimento.split("/").map(Number);
+    const nascimento = new Date(ano, mes - 1, dia);
+    const hoje = new Date();
+
+    let idade = hoje.getFullYear() - nascimento.getFullYear();
+
+    if (
+      hoje.getMonth() < nascimento.getMonth() ||
+      (hoje.getMonth() === nascimento.getMonth() &&
+        hoje.getDate() < nascimento.getDate())
+    ) {
+      idade--;
+    }
+
+    return idade;
+  }
+
+  const idade = calcularIdade(pet.birthDate);
+
+  const handleDelete = () => {
+    if (isReadOnly)
+      return Alert.alert(
+        "Acesso Restrito",
+        "Apenas o dono pode excluir o pet."
+      );
+
+    Alert.alert("Excluir Pet", `Tem certeza que deseja excluir ${pet.name}?`, [
+      { text: "Cancelar", style: "cancel" },
+      {
+        text: "Excluir",
+        style: "destructive",
+        onPress: () => {
+          deletePet(pet.id);
+          router.replace("/mypets");
+        },
+      },
+    ]);
   };
 
   return (
     <View style={styles.container}>
       <View style={styles.containerInfo}>
-        <Pressable
-          style={styles.arrowBack}
-          onPress={() => router.navigate("/mypets")}
-        >
+        <Pressable style={styles.arrowBack} onPress={() => router.back()}>
           <Ionicons name="arrow-back" size={28} color="#fdcb58" />
         </Pressable>
 
-        {/* FOTO */}
-        <Pressable onPress={handlePickImage}>
-          <Image source={{ uri: photo }} style={styles.image} />
+        <Pressable onPress={handlePickImage} disabled={isReadOnly}>
+          <Image
+            source={photo ? { uri: photo } : require("@/assets/imagens/1.png")}
+            style={[styles.image, isReadOnly && { opacity: 0.6 }]}
+          />
         </Pressable>
 
-        {/* Nome (fixo) */}
         <Text style={styles.name}>{pet.name}</Text>
 
-        {/* Raça e Idade (somente exibição) */}
         <View style={styles.ageBox}>
           <Text style={styles.age}>{pet.breed}</Text>
-          <Text style={styles.age}>{pet.age} anos</Text>
+          <Text style={styles.age}>{idade} anos</Text>
         </View>
       </View>
 
       <View style={styles.containerButton}>
         <Text style={styles.text}>Ficha do Animal</Text>
+
         <View style={styles.grid}>
+
+          {/* 🔥 Agora passa readonly corretamente */}
           <RecordButton
-            title={"Contato"}
-            onPress={() => router.navigate("/contact")}
-          />
-          <RecordButton
-            title={"Problemas de Saúde"}
+            title="Contato"
             onPress={() =>
-              router.push({ pathname: "/health", params: { petId: String(pet.id) } })
+              router.push({
+                pathname: "/contact",
+                params: { readonly: String(isReadOnly) },
+              })
             }
           />
+
           <RecordButton
-            title={"Vacinas"}
-            onPress={() => router.navigate("/vaccine")}
-          />
-          <RecordButton
-            title={"Alimentação"}
+            title="Problemas de Saúde"
             onPress={() =>
-              router.push({ pathname: "/food", params: { petId: String(pet.id) } })
+              router.push({
+                pathname: "/health",
+                params: { petId: String(pet.id), readonly: String(isReadOnly) },
+              })
+            }
+          />
+
+          <RecordButton
+            title="Vacinas"
+            onPress={() =>
+              router.push({
+                pathname: "/vaccine",
+                params: { readonly: String(isReadOnly) },
+              })
+            }
+          />
+
+          <RecordButton
+            title="Alimentação"
+            onPress={() =>
+              router.push({
+                pathname: "/food",
+                params: { petId: String(pet.id), readonly: String(isReadOnly) },
+              })
             }
           />
         </View>
+
+        {!isReadOnly && (
+          <Pressable style={styles.deleteButton} onPress={handleDelete}>
+            <Text style={styles.deleteText}>Excluir Pet</Text>
+          </Pressable>
+        )}
       </View>
-    <View style={styles.footer}>
-      <Footer text="Apaixonados por animais" textColor="#fff" showImage={false} />
-    </View>
+
+      <View style={styles.footer}>
+        <Footer text="Apaixonados por animais" textColor="#fff" showImage={false} />
+      </View>
     </View>
   );
 }
@@ -171,7 +254,20 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     gap: 13,
   },
+  deleteButton: {
+    marginTop: 25,
+    backgroundColor: "#ff4d4d",
+    paddingVertical: 14,
+    borderRadius: 12,
+    top: 10,
+  },
+  deleteText: {
+    color: "#fff",
+    textAlign: "center",
+    fontSize: 18,
+    fontWeight: "bold",
+  },
   footer: {
-    top: 60
-  }
+    top: 80,
+  },
 });

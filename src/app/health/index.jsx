@@ -9,12 +9,13 @@ import {
 } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { Ionicons, MaterialIcons } from "@expo/vector-icons";
+import { Ionicons } from "@expo/vector-icons";
 import HealthItem from "../../components/HealthItem";
 
 export default function Health() {
   const router = useRouter();
-  const { petId } = useLocalSearchParams();
+  const { petId, readonly } = useLocalSearchParams(); // 🔥 pegar readonly
+  const isReadOnly = readonly === "true";
 
   const [healthIssues, setHealthIssues] = useState([]);
   const [newIssue, setNewIssue] = useState("");
@@ -54,7 +55,6 @@ export default function Health() {
     saveHealthIssues();
   }, [healthIssues]);
 
-
   const handleAdd = () => {
     if (newIssue.trim()) {
       const newItem = {
@@ -79,7 +79,9 @@ export default function Health() {
 
   if (!petId) {
     return (
-      <View style={[styles.container, { justifyContent: "center", alignItems: "center" }]}>
+      <View
+        style={[styles.container, { justifyContent: "center", alignItems: "center" }]}
+      >
         <Text style={{ color: "#fff" }}>Pet não encontrado</Text>
       </View>
     );
@@ -87,10 +89,9 @@ export default function Health() {
 
   return (
     <View style={styles.container}>
-      {/* ======= Header ======= */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => router.back()}>
-          <MaterialIcons name="arrow-back" size={28} color="#fdcb58" />
+          <Ionicons name="arrow-back" size={28} color="#fdcb58" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Problemas de Saúde</Text>
         <View />
@@ -100,8 +101,9 @@ export default function Health() {
         {/* ======= Botão de adicionar ======= */}
         {!showInput ? (
           <TouchableOpacity
-            style={styles.addIconContainer}
-            onPress={() => setShowInput(true)}
+            style={[styles.addIconContainer, isReadOnly && { opacity: 0.3 }]}
+            onPress={() => !isReadOnly && setShowInput(true)}
+            disabled={isReadOnly}
           >
             <Ionicons name="add" size={28} color="#142A8C" />
           </TouchableOpacity>
@@ -114,7 +116,11 @@ export default function Health() {
               value={newIssue}
               onChangeText={setNewIssue}
             />
-            <TouchableOpacity style={styles.addButton} onPress={handleAdd}>
+            <TouchableOpacity
+              style={styles.addButton}
+              onPress={handleAdd}
+              disabled={isReadOnly}
+            >
               <Text style={styles.addText}>Salvar</Text>
             </TouchableOpacity>
           </View>
@@ -131,6 +137,7 @@ export default function Health() {
                 item={item}
                 onEdit={handleEdit}
                 onDelete={handleDelete}
+                isReadOnly={isReadOnly} // 🔥
               />
             ))
           )}
@@ -166,7 +173,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     width: "90%",
     alignSelf: "center",
-    marginTop: 350,
+    marginTop: 20,
   },
   addIconContainer: {
     marginBottom: 16,
