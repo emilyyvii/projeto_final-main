@@ -43,6 +43,11 @@ export default function Home() {
         </View>
       </View>
 
+      {/* --- Botão flutuante de SUPORTE --- */}
+      <Pressable style={styles.supportButton} onPress={() => router.navigate("/support")}>
+        <Ionicons name="chatbubble-ellipses" size={28} color="#fff" />
+      </Pressable>
+
       <View style={styles.footer}>
         <Footer text="Apaixonados por animal" textColor="000" showImage={true} />
       </View>
@@ -110,5 +115,21 @@ const styles = StyleSheet.create({
 
   footer: {
     marginTop: 60,
+  },
+  supportButton: {
+    position: "absolute",
+    bottom: 40,
+    right: 25,
+    backgroundColor: "#142A8C", 
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    justifyContent: "center",
+    alignItems: "center",
+    elevation: 6,
+    shadowColor: "#000",
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    shadowOffset: { width: 0, height: 2 },
   },
 });
