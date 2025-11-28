@@ -10,7 +10,7 @@ import { useState } from "react";
 export default function PetDetail() {
   const { id, readonly } = useLocalSearchParams();
 
-  // 🔥 Profissional recebe readonly="true"
+
   const isReadOnly = readonly === "true";
 
   const { pets, updatePet, deletePet } = usePetContext();
@@ -115,7 +115,7 @@ export default function PetDetail() {
 
         <View style={styles.grid}>
 
-          {/* 🔥 Agora passa readonly corretamente */}
+       
           <RecordButton
             title="Contato"
             onPress={() =>
@@ -141,10 +141,14 @@ export default function PetDetail() {
             onPress={() =>
               router.push({
                 pathname: "/vaccine",
-                params: { readonly: String(isReadOnly) },
+                params: {
+                  petId: String(pet.id),     
+                  readonly: String(isReadOnly),
+                },
               })
             }
           />
+
 
           <RecordButton
             title="Alimentação"

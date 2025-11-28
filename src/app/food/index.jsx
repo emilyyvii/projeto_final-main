@@ -6,7 +6,7 @@ import { useState, useEffect } from "react";
 import usePetContext from "../../components/context/usePetContext";
 
 export default function Food() {
-  const { petId, readonly } = useLocalSearchParams(); // 🔥 receber readonly
+  const { petId, readonly } = useLocalSearchParams(); 
   const isReadOnly = readonly === "true";
 
   const { pets } = usePetContext();
@@ -18,7 +18,7 @@ export default function Food() {
 
   const STORAGE_KEY = `@food_data_${petId}`;
 
-  // Carrega dados do pet específico
+
   useEffect(() => {
     const loadData = async () => {
       if (!petId) return;
@@ -37,9 +37,8 @@ export default function Food() {
     loadData();
   }, [petId]);
 
-  // Salva automaticamente ao alterar campos
   useEffect(() => {
-    if (isReadOnly) return; // 🔥 não salvar se for readonly
+    if (isReadOnly) return; 
     const saveData = async () => {
       if (!petId) return;
       try {
@@ -54,9 +53,9 @@ export default function Food() {
     saveData();
   }, [tipoRacao, quantidade, evitar, petId, isReadOnly]);
 
-  // Limpa campo individual
+
   const limparCampo = (campo) => {
-    if (isReadOnly) return; // 🔥 não limpar se for readonly
+    if (isReadOnly) return;
     if (campo === "tipoRacao") setTipoRacao("");
     if (campo === "quantidade") setQuantidade("");
     if (campo === "evitar") setEvitar("");
@@ -82,7 +81,7 @@ export default function Food() {
         <Text style={styles.titleTop}>Alimentação</Text>
       </View>
 
-      {/* Nome do pet */}
+
       <Text style={styles.petName}>🐾 {pet.name}</Text>
 
       {/* Corpo */}
@@ -96,14 +95,14 @@ export default function Food() {
               placeholder="Informe o tipo de ração"
               placeholderTextColor="#fff"
               value={tipoRacao}
-              onChangeText={isReadOnly ? undefined : setTipoRacao} // 🔥 bloqueio edição
-              editable={!isReadOnly} // 🔥 readonly bloqueia input
+              onChangeText={isReadOnly ? undefined : setTipoRacao} 
+              editable={!isReadOnly}
             />
             <Pressable onPress={() => limparCampo("tipoRacao")} disabled={isReadOnly}>
               <Ionicons
                 name="trash"
                 size={22}
-                color={isReadOnly ? "#999" : "#fff"} // 🔥 ícone cinza se readonly
+                color={isReadOnly ? "#999" : "#fff"} 
               />
             </Pressable>
           </View>
@@ -163,7 +162,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 18,
   },
   titleTop: {
-    color: "#F7C843",
+    color: "#fff",
     fontSize: 22,
     fontWeight: "bold",
     marginLeft: 12,
