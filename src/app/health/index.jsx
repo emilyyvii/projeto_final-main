@@ -98,7 +98,6 @@ export default function Health() {
       </View>
 
       <View style={styles.contentHealth}>
-        {/* ======= Botão de adicionar ======= */}
         {!showInput ? (
           <TouchableOpacity
             style={[styles.addIconContainer, isReadOnly && { opacity: 0.3 }]}

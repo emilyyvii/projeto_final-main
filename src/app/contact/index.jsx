@@ -16,9 +16,8 @@ const KEY_EMAIL = "@contact_email";
 
 export default function Contact() {
   const router = useRouter();
-  const { readonly } = useLocalSearchParams(); // vai receber "true" ou "false"
+  const { readonly } = useLocalSearchParams();
 
-  // 🔥 Se readonly === "true", ninguém pode editar
   const isReadOnly = readonly === "true";
 
   const [telefone, setTelefone] = useState("");
@@ -79,26 +78,23 @@ export default function Contact() {
       </View>
 
       <View style={styles.Content}>
+
         {/* TELEFONE */}
         <View style={styles.infoBox}>
           <View style={styles.infoHeader}>
             <Text style={styles.label}>Número de telefone</Text>
-            <Pressable
-              onPress={toggleEditTelefone}
-              disabled={isReadOnly}
-              style={{ opacity: isReadOnly ? 0.3 : 1 }}
-            >
-              <MaterialIcons
-                name="edit"
-                size={22}
-                color={isReadOnly ? "transparent" : "#F7C843"}
-              />
-            </Pressable>
+
+            {/* 🔥 Ícone de editar só aparece para o dono */}
+            {!isReadOnly && (
+              <Pressable onPress={toggleEditTelefone}>
+                <MaterialIcons name="edit" size={22} color="#F7C843" />
+              </Pressable>
+            )}
           </View>
 
           {editandoTelefone && !isReadOnly ? (
             <TextInput
-              style={[styles.input]}
+              style={styles.input}
               placeholder="Digite o novo número..."
               placeholderTextColor="#999"
               value={telefone}
@@ -115,22 +111,18 @@ export default function Contact() {
         <View style={styles.infoBox}>
           <View style={styles.infoHeader}>
             <Text style={styles.label}>E-mail</Text>
-            <Pressable
-              onPress={toggleEditEmail}
-              disabled={isReadOnly}
-              style={{ opacity: isReadOnly ? 0.3 : 1 }}
-            >
-              <MaterialIcons
-                name="edit"
-                size={22}
-                color={isReadOnly ? "transparent" : "#F7C843"}
-              />
-            </Pressable>
+
+            {/* 🔥 Ícone escondido para profissionais */}
+            {!isReadOnly && (
+              <Pressable onPress={toggleEditEmail}>
+                <MaterialIcons name="edit" size={22} color="#F7C843" />
+              </Pressable>
+            )}
           </View>
 
           {editandoEmail && !isReadOnly ? (
             <TextInput
-              style={[styles.input]}
+              style={styles.input}
               placeholder="Digite o novo e-mail..."
               placeholderTextColor="#999"
               value={email}
@@ -144,6 +136,7 @@ export default function Contact() {
             <Text style={styles.value}>{email || "—"}</Text>
           )}
         </View>
+
       </View>
     </View>
   );

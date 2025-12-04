@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -12,8 +12,16 @@ export default function HealthItem({ item, onEdit, onDelete, isReadOnly }) {
   const [isEditing, setIsEditing] = useState(false);
   const [editedText, setEditedText] = useState(item.text);
 
+  // 🔥 se readonly ativar enquanto edita, fecha edição
+  useEffect(() => {
+    if (isReadOnly && isEditing) {
+      setIsEditing(false);
+      setEditedText(item.text);
+    }
+  }, [isReadOnly]);
+
   const handleSave = () => {
-    if (editedText.trim()) {
+    if (!isReadOnly && editedText.trim()) {
       onEdit(item.id, editedText);
       setIsEditing(false);
     }
@@ -24,40 +32,40 @@ export default function HealthItem({ item, onEdit, onDelete, isReadOnly }) {
       {isEditing ? (
         <View style={styles.editContainer}>
           <TextInput
-            style={styles.input}
+            style={[
+              styles.input,
+              isReadOnly && { opacity: 0.4 }
+            ]}
             value={editedText}
             onChangeText={setEditedText}
             placeholder="Editar problema..."
+            editable={!isReadOnly}
           />
-          <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
-            <MaterialIcons name="check" size={22} color="black" />
-          </TouchableOpacity>
+
+          {!isReadOnly && (
+            <TouchableOpacity
+              style={styles.saveButton}
+              onPress={handleSave}
+            >
+              <MaterialIcons name="check" size={22} color="black" />
+            </TouchableOpacity>
+          )}
         </View>
       ) : (
         <View style={styles.row}>
           <Text style={styles.text}>{item.text}</Text>
-          <View style={styles.actions}>
-            <TouchableOpacity
-              onPress={() => !isReadOnly && setIsEditing(true)}
-              style={{ opacity: isReadOnly ? 0.3 : 1 }}
-            >
-              <MaterialIcons
-                name="edit"
-                size={22}
-                color={isReadOnly ? "transparent" : "#002E9D"}
-              />
-            </TouchableOpacity>
-            <TouchableOpacity
-              onPress={() => !isReadOnly && onDelete(item.id)}
-              style={{ opacity: isReadOnly ? 0.3 : 1 }}
-            >
-              <MaterialIcons
-                name="delete"
-                size={22}
-                color={isReadOnly ? "transparent" : "#E53935"}
-              />
-            </TouchableOpacity>
-          </View>
+
+          {!isReadOnly && (
+            <View style={styles.actions}>
+              <TouchableOpacity onPress={() => setIsEditing(true)}>
+                <MaterialIcons name="edit" size={22} color="#002E9D" />
+              </TouchableOpacity>
+
+              <TouchableOpacity onPress={() => onDelete(item.id)}>
+                <MaterialIcons name="delete" size={22} color="#E53935" />
+              </TouchableOpacity>
+            </View>
+          )}
         </View>
       )}
     </View>
