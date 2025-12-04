@@ -9,16 +9,13 @@ import QRCode from "react-native-qrcode-svg";
 export default function Tag() {
   const { pets } = useContext(PetContext);
 
-  // Estado interno para o pet selecionado
   const [selectedPetId, setSelectedPetId] = useState(pets[0]?.id);
 
   const pet = pets.find((p) => p.id === selectedPetId) || pets[0];
   const petCode = String(pet.id).toUpperCase();
 
-  // Estado da bateria
   const [battery, setBattery] = useState(99);
 
-  // Simula variação da bateria
   useEffect(() => {
     const interval = setInterval(() => {
       setBattery((prev) => {
@@ -50,7 +47,7 @@ export default function Tag() {
                 <Pressable
                   key={item.id}
                   style={styles.footerItem}
-                  onPress={() => setSelectedPetId(item.id)} // Atualiza estado em vez de navegar
+                  onPress={() => setSelectedPetId(item.id)} 
                 >
                   <Image
                     source={item.photo ? { uri: item.photo } : require("@/assets/imagens/1.png")}

@@ -79,7 +79,6 @@ export default function Contact() {
         <Text style={styles.headerTitle}>Informações de contato</Text>
       </View>
 
-      {/* FOTO E NOME DO PET */}
       <View style={styles.petInfo}>
         <Image
           source={
@@ -93,26 +92,21 @@ export default function Contact() {
       </View>
 
       <View style={styles.Content}>
-        {/* TELEFONE */}
+
         <View style={styles.infoBox}>
           <View style={styles.infoHeader}>
             <Text style={styles.label}>Número de telefone</Text>
-            <Pressable
-              onPress={toggleEditTelefone}
-              disabled={isReadOnly}
-              style={{ opacity: isReadOnly ? 0.3 : 1 }}
-            >
-              <MaterialIcons
-                name="edit"
-                size={22}
-                color={isReadOnly ? "transparent" : "#F7C843"}
-              />
-            </Pressable>
+
+            {!isReadOnly && (
+              <Pressable onPress={toggleEditTelefone}>
+                <MaterialIcons name="edit" size={22} color="#F7C843" />
+              </Pressable>
+            )}
           </View>
 
           {editandoTelefone && !isReadOnly ? (
             <TextInput
-              style={[styles.input]}
+              style={styles.input}
               placeholder="Digite o novo número..."
               placeholderTextColor="#999"
               value={telefone}
@@ -124,27 +118,21 @@ export default function Contact() {
             <Text style={styles.value}>{telefone || "—"}</Text>
           )}
         </View>
-
-        {/* EMAIL */}
+        
         <View style={styles.infoBox}>
           <View style={styles.infoHeader}>
             <Text style={styles.label}>E-mail</Text>
-            <Pressable
-              onPress={toggleEditEmail}
-              disabled={isReadOnly}
-              style={{ opacity: isReadOnly ? 0.3 : 1 }}
-            >
-              <MaterialIcons
-                name="edit"
-                size={22}
-                color={isReadOnly ? "transparent" : "#F7C843"}
-              />
-            </Pressable>
+
+            {!isReadOnly && (
+              <Pressable onPress={toggleEditEmail}>
+                <MaterialIcons name="edit" size={22} color="#F7C843" />
+              </Pressable>
+            )}
           </View>
 
           {editandoEmail && !isReadOnly ? (
             <TextInput
-              style={[styles.input]}
+              style={styles.input}
               placeholder="Digite o novo e-mail..."
               placeholderTextColor="#999"
               value={email}
@@ -158,6 +146,7 @@ export default function Contact() {
             <Text style={styles.value}>{email || "—"}</Text>
           )}
         </View>
+
       </View>
     </View>
   );
@@ -180,7 +169,6 @@ const styles = StyleSheet.create({
     marginLeft: 10,
   },
 
-  /* FOTO + NOME DO PET */
   petInfo: {
     alignItems: "center",
     marginTop: 25,

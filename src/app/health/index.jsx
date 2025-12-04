@@ -7,6 +7,7 @@ import {
   ScrollView,
   StyleSheet,
   Image,
+  TouchableWithoutFeedback,
 } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -15,7 +16,6 @@ import HealthItem from "../../components/HealthItem";
 
 export default function Health() {
   const router = useRouter();
-
   const { petId, readonly, petName, petPhoto } = useLocalSearchParams();
   const isReadOnly = readonly === "true";
 
@@ -47,6 +47,8 @@ export default function Health() {
 
   useEffect(() => {
     if (!isLoaded) return;
+    if (isReadOnly) return;
+
     const saveHealthIssues = async () => {
       try {
         await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(healthIssues));
@@ -55,7 +57,7 @@ export default function Health() {
       }
     };
     saveHealthIssues();
-  }, [healthIssues]);
+  }, [healthIssues, isLoaded, isReadOnly]);
 
   const handleAdd = () => {
     if (newIssue.trim()) {
@@ -76,6 +78,7 @@ export default function Health() {
   };
 
   const handleDelete = (id) => {
+    if (isReadOnly) return;
     setHealthIssues((prev) => prev.filter((item) => item.id !== id));
   };
 
@@ -91,11 +94,11 @@ export default function Health() {
 
   return (
     <View style={styles.container}>
-
+      {/* ===== HEADER ===== */}
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()}>
+        <TouchableWithoutFeedback onPress={() => router.back()}>
           <Ionicons name="arrow-back" size={28} color="#fdcb58" />
-        </TouchableOpacity>
+        </TouchableWithoutFeedback>
         <Text style={styles.headerTitle}>Problemas de Saúde</Text>
         <View />
       </View>
@@ -109,7 +112,6 @@ export default function Health() {
       </View>
 
       <View style={styles.contentHealth}>
-
         {!showInput ? (
           <TouchableOpacity
             style={[styles.addIconContainer, isReadOnly && { opacity: 0.3 }]}
@@ -176,6 +178,7 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     marginLeft: 10,
   },
+
   petInfo: {
     alignItems: "center",
     marginTop: 25,
