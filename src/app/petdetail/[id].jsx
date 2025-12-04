@@ -10,7 +10,6 @@ import { useState } from "react";
 export default function PetDetail() {
   const { id, readonly } = useLocalSearchParams();
 
-
   const isReadOnly = readonly === "true";
 
   const { pets, updatePet, deletePet } = usePetContext();
@@ -114,52 +113,67 @@ export default function PetDetail() {
         <Text style={styles.text}>Ficha do Animal</Text>
 
         <View style={styles.grid}>
+  <RecordButton
+    title="Contato"
+    onPress={() =>
+      router.push({
+        pathname: "/contact",
+        params: {
+          readonly: String(isReadOnly),
+          petId: String(pet.id),
+          petName: pet.name,
+          petPhoto: photo,
+        },
+      })
+    }
+  />
 
-       
-          <RecordButton
-            title="Contato"
-            onPress={() =>
-              router.push({
-                pathname: "/contact",
-                params: { readonly: String(isReadOnly) },
-              })
-            }
-          />
+  <RecordButton
+    title="Problemas de Saúde"
+    onPress={() =>
+      router.push({
+        pathname: "/health",
+        params: {
+          readonly: String(isReadOnly),
+          petId: String(pet.id),
+          petName: pet.name,
+          petPhoto: photo,
+        },
+      })
+    }
+  />
 
-          <RecordButton
-            title="Problemas de Saúde"
-            onPress={() =>
-              router.push({
-                pathname: "/health",
-                params: { petId: String(pet.id), readonly: String(isReadOnly) },
-              })
-            }
-          />
+  <RecordButton
+    title="Vacinas"
+    onPress={() =>
+      router.push({
+        pathname: "/vaccine",
+        params: {
+          readonly: String(isReadOnly),
+          petId: String(pet.id),
+          petName: pet.name,
+          petPhoto: photo,
+        },
+      })
+    }
+  />
 
-          <RecordButton
-            title="Vacinas"
-            onPress={() =>
-              router.push({
-                pathname: "/vaccine",
-                params: {
-                  petId: String(pet.id),     
-                  readonly: String(isReadOnly),
-                },
-              })
-            }
-          />
+  <RecordButton
+    title="Alimentação"
+    onPress={() =>
+      router.push({
+        pathname: "/food",
+        params: {
+          readonly: String(isReadOnly),
+          petId: String(pet.id),
+          petName: pet.name,
+          petPhoto: photo,
+        },
+      })
+    }
+  />
+</View>
 
-
-          <RecordButton
-            title="Alimentação"
-            onPress={() =>
-              router.push({
-                pathname: "/food",
-                params: { petId: String(pet.id), readonly: String(isReadOnly) },
-              })
-            }
-          />
-        </View>
 
         {!isReadOnly && (
           <Pressable style={styles.deleteButton} onPress={handleDelete}>

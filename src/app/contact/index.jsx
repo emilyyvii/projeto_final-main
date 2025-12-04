@@ -6,6 +6,7 @@ import {
   TextInput,
   Pressable,
   Keyboard,
+  Image,
 } from "react-native";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { MaterialIcons, Ionicons } from "@expo/vector-icons";
@@ -16,9 +17,9 @@ const KEY_EMAIL = "@contact_email";
 
 export default function Contact() {
   const router = useRouter();
-  const { readonly } = useLocalSearchParams(); // vai receber "true" ou "false"
 
-  // 🔥 Se readonly === "true", ninguém pode editar
+  const { readonly, petName, petPhoto } = useLocalSearchParams();
+
   const isReadOnly = readonly === "true";
 
   const [telefone, setTelefone] = useState("");
@@ -76,6 +77,19 @@ export default function Contact() {
           <Ionicons name="arrow-back" size={28} color="#fdcb58" />
         </Pressable>
         <Text style={styles.headerTitle}>Informações de contato</Text>
+      </View>
+
+      {/* FOTO E NOME DO PET */}
+      <View style={styles.petInfo}>
+        <Image
+          source={
+            petPhoto
+              ? { uri: petPhoto }
+              : require("@/assets/imagens/1.png")
+          }
+          style={styles.petImage}
+        />
+        <Text style={styles.petName}>{petName}</Text>
       </View>
 
       <View style={styles.Content}>
@@ -165,7 +179,28 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     marginLeft: 10,
   },
-  Content: { marginTop: 40 },
+
+  /* FOTO + NOME DO PET */
+  petInfo: {
+    alignItems: "center",
+    marginTop: 25,
+    marginBottom: 10,
+  },
+  petImage: {
+    width: 95,
+    height: 95,
+    borderRadius: 47.5,
+    borderWidth: 3,
+    borderColor: "#002E9D",
+  },
+  petName: {
+    fontSize: 22,
+    fontWeight: "bold",
+    color: "#002E9D",
+    marginTop: 10,
+  },
+
+  Content: { marginTop: 20 },
   infoBox: {
     backgroundColor: "#142A8C",
     borderRadius: 14,

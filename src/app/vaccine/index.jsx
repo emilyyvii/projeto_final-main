@@ -7,90 +7,87 @@ import {
   StyleSheet,
   FlatList,
   Pressable,
-  ScrollView
+  Image,
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter, useLocalSearchParams } from "expo-router";
+import usePetContext from "../../components/context/usePetContext";
 
 export default function VacinasScreen() {
   const router = useRouter();
-  const { readonly, petId } = useLocalSearchParams();
 
+  const { readonly, petId, petName: paramPetName, petPhoto: paramPetPhoto } =
+    useLocalSearchParams();
   const isReadOnly = readonly === "true";
   const STORAGE_KEY = `@vacinas_${petId}`;
 
-  const [vacinas, setVacinas] = useState([]);
+  const { pets } = usePetContext();
+  const petFromContext = pets.find((p) => String(p.id) === String(petId));
+  const petName = paramPetName ?? petFromContext?.name ?? "";
+  const petPhoto = paramPetPhoto ?? petFromContext?.photo ?? "";
 
+  const [vacinas, setVacinas] = useState([]);
+  const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {
-    const loadVacinas = async () => {
-      if (!petId) return;
-
+    if (!petId) return;
+    const load = async () => {
       try {
         const saved = await AsyncStorage.getItem(STORAGE_KEY);
         if (saved) setVacinas(JSON.parse(saved));
       } catch (err) {
         console.log("Erro ao carregar vacinas:", err);
+      } finally {
+        setIsLoaded(true);
       }
     };
-
-    loadVacinas();
+    load();
   }, [petId]);
 
-
   useEffect(() => {
+    if (!isLoaded) return;
     if (isReadOnly) return;
-
-    const saveVacinas = async () => {
+    const save = async () => {
       try {
         await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(vacinas));
       } catch (err) {
         console.log("Erro ao salvar vacinas:", err);
       }
     };
-
-    saveVacinas();
-  }, [vacinas, isReadOnly]);
+    save();
+  }, [vacinas, isLoaded, isReadOnly]);
 
   const addVacina = () => {
     if (isReadOnly) return;
-
     const nova = {
-      id: Date.now(),
+      id: Date.now().toString(),
       nome: "",
       aplicacao: "",
       validade: "",
     };
-
     setVacinas((prev) => [...prev, nova]);
   };
 
   const editarCampo = (id, campo, valor) => {
     if (isReadOnly) return;
-    setVacinas((prev) =>
-      prev.map((v) => (v.id === id ? { ...v, [campo]: valor } : v))
-    );
+    setVacinas((prev) => prev.map((v) => (v.id === id ? { ...v, [campo]: valor } : v)));
   };
 
   const excluirVacina = (id) => {
     if (isReadOnly) return;
-
     setVacinas((prev) => prev.filter((v) => v.id !== id));
   };
 
   const renderItem = ({ item }) => (
     <View style={styles.row}>
       <TextInput
-        style={[
-          styles.cell,
-          { flex: 2, color: isReadOnly ? "#ccc" : "#fff" },
-        ]}
+        style={[styles.cell, { flex: 2, color: isReadOnly ? "#ccc" : "#fff" }]}
         placeholder="Nome da Vacina"
         placeholderTextColor={isReadOnly ? "#999" : "#ddd"}
         value={item.nome}
-        onChangeText={(t) => editarCampo(item.id, "nome", t)}
         editable={!isReadOnly}
+        onChangeText={(t) => editarCampo(item.id, "nome", t)}
       />
 
       <TextInput
@@ -98,8 +95,8 @@ export default function VacinasScreen() {
         placeholder="Data"
         placeholderTextColor={isReadOnly ? "#999" : "#ddd"}
         value={item.aplicacao}
-        onChangeText={(t) => editarCampo(item.id, "aplicacao", t)}
         editable={!isReadOnly}
+        onChangeText={(t) => editarCampo(item.id, "aplicacao", t)}
       />
 
       <TextInput
@@ -107,8 +104,8 @@ export default function VacinasScreen() {
         placeholder="Validade"
         placeholderTextColor={isReadOnly ? "#999" : "#ddd"}
         value={item.validade}
-        onChangeText={(t) => editarCampo(item.id, "validade", t)}
         editable={!isReadOnly}
+        onChangeText={(t) => editarCampo(item.id, "validade", t)}
       />
 
       {!isReadOnly && (
@@ -119,9 +116,18 @@ export default function VacinasScreen() {
     </View>
   );
 
+  if (!petId) {
+    return (
+      <View style={styles.container}>
+        <Text style={{ color: "#fff", textAlign: "center", marginTop: 50 }}>
+          Pet não encontrado
+        </Text>
+      </View>
+    );
+  }
+
   return (
     <View style={styles.container}>
-      {/* HEADER */}
       <View style={styles.header}>
         <Pressable onPress={() => router.back()}>
           <Ionicons name="arrow-back" size={28} color="#fdcb58" />
@@ -129,31 +135,31 @@ export default function VacinasScreen() {
         <Text style={styles.headerTitle}>Vacinas</Text>
       </View>
 
-      {/* TABELA */}
-      <View style={styles.tableVaccine}>
+      <View style={styles.petInfo}>
+        <Image
+          source={petPhoto ? { uri: petPhoto } : require("@/assets/imagens/1.png")}
+          style={styles.petImage}
+        />
+        <Text style={styles.petName}>{petName}</Text>
+      </View>
 
-        {/* LINHA FIXA */}
+      <View style={styles.tableVaccine}>
         <View style={[styles.row, styles.columTable]}>
-          <Text style={[styles.cell, { flex: 2, fontWeight: "bold" }]}>
-            Vacinas
-          </Text>
+          <Text style={[styles.cell, { flex: 2, fontWeight: "bold" }]}>Vacinas</Text>
           <Text style={[styles.cell, { fontWeight: "bold" }]}>Data</Text>
           <Text style={[styles.cell, { fontWeight: "bold" }]}>Validade</Text>
           <View style={{ width: 30 }} />
         </View>
 
-        {/* CORPO ROLÁVEL */}
-        <ScrollView style={{ maxHeight: 380 }}>
-          <FlatList
-            data={vacinas}
-            keyExtractor={(item) => item.id.toString()}
-            renderItem={renderItem}
-            scrollEnabled={false}
-            ListEmptyComponent={
-              <Text style={styles.emptyText}>Nenhuma vacina adicionada</Text>
-            }
-          />
-        </ScrollView>
+        <FlatList
+          data={vacinas}
+          keyExtractor={(item) => item.id}
+          renderItem={renderItem}
+          style={{ maxHeight: 360 }}
+          ListEmptyComponent={
+            <Text style={styles.emptyText}>Nenhuma vacina cadastrada</Text>
+          }
+        />
 
         {!isReadOnly && (
           <TouchableOpacity style={styles.addButton} onPress={addVacina}>
@@ -187,10 +193,31 @@ const styles = StyleSheet.create({
     marginLeft: 10,
   },
 
+  /* FOTO + NOME */
+  petInfo: {
+    alignItems: "center",
+    marginTop: 25,
+    marginBottom: 10,
+  },
+  petImage: {
+    width: 95,
+    height: 95,
+    borderRadius: 47.5,
+    borderWidth: 3,
+    borderColor: "#002E9D",
+  },
+  petName: {
+    fontSize: 22,
+    fontWeight: "bold",
+    color: "#002E9D",
+    marginTop: 10,
+  },
+
   tableVaccine: {
-    marginTop: 50,
+    marginTop: 25,
     width: "90%",
     alignSelf: "center",
+    flex: 1,
   },
 
   columTable: {
