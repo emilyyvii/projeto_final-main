@@ -1,7 +1,5 @@
 import { useState, useEffect } from "react";
-<<<<<<< HEAD
 import { View,Text,StyleSheet,TextInput, Pressable, Keyboard,} from "react-native";
-=======
 import {
   View,
   Text,
@@ -11,7 +9,6 @@ import {
   Keyboard,
   Image,
 } from "react-native";
->>>>>>> 1ca9aa5462a958c6c06fd2196e0b2a5116e49fb0
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { MaterialIcons, Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -122,11 +119,6 @@ export default function Contact() {
             <Text style={styles.value}>{telefone || "—"}</Text>
           )}
         </View>
-<<<<<<< HEAD
-
-=======
-        
->>>>>>> 1ca9aa5462a958c6c06fd2196e0b2a5116e49fb0
         <View style={styles.infoBox}>
           <View style={styles.infoHeader}>
             <Text style={styles.label}>E-mail</Text>
