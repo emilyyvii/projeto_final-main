@@ -6,6 +6,7 @@ import {
   StyleSheet,
   ScrollView,
   Pressable,
+  TouchableWithoutFeedback,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
@@ -83,16 +84,14 @@ export default function Notifications() {
   };
 
   return (
-    <View style={styles.container}>
-      <View style={styles.header}>
-        <Ionicons
-          name="arrow-back"
-          size={28}
-          color="#f4c44e"
-          onPress={() => router.back()}
-        />
-        <Text style={styles.headerTitle}>Notificações de Alertas</Text>
-      </View>
+     <View style={styles.container}>
+         <View style={styles.header}>
+           <TouchableWithoutFeedback onPress={() => router.back()}>
+             <Ionicons name="arrow-back" size={28} color="#fdcb58" />
+           </TouchableWithoutFeedback>
+           <Text style={styles.headerTitle}>Problemas de Saúde</Text>
+           <View />
+         </View>
 
       <ScrollView contentContainerStyle={styles.content}>
         <View style={styles.iconContainer}>
@@ -129,13 +128,14 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#1e1c89",
-    padding: 15,
-    height: 80
+    backgroundColor: "#002E9D",
+    paddingTop: 50,
+    paddingBottom: 15,
+    paddingHorizontal: 20,
   },
   headerTitle: {
     color: "#fff",
-    fontSize: 22,
+    fontSize: 20,
     fontWeight: "bold",
     marginLeft: 10,
   },

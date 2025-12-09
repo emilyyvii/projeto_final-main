@@ -111,10 +111,11 @@ const styles = StyleSheet.create({
     },
   title: {
      color: stylesColors.highlight, 
-     fontSize: 22, textAlign: "center",
-      fontWeight: "bold",
-       marginBottom: 6
-       },
+     fontSize: 22,
+     textAlign: "center",
+     fontWeight: "bold",
+     marginBottom: 6
+    },
   socialContainer: { 
     flexDirection: "row", 
     justifyContent: "space-around", 

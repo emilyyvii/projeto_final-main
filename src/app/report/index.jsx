@@ -56,11 +56,15 @@ export default function Report() {
     <SafeAreaView style={[styles.safeArea, { paddingTop: STATUSBAR_HEIGHT }]}>
       <View style={styles.container}>
         <View style={styles.header}>
-          <Pressable style={styles.arrowBack} onPress={() => router.navigate("/home")}>
-            <Ionicons name="arrow-back" size={26} color="#FFD400" />
-          </Pressable>
-          <Text style={styles.headerTitle}>Relatório do Animal</Text>
-        </View>
+  <Ionicons
+    name="arrow-back"
+    size={28}
+    color="#f4c44e"
+    onPress={() => router.back()}
+  />
+  <Text style={styles.headerTitle}>Relatório de Saúde</Text>
+</View>
+
 
         <ScrollView
           horizontal
@@ -128,25 +132,28 @@ export default function Report() {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: "#141496",
+    backgroundColor: "#002E9D",
   },
   container: {
     flex: 1,
     backgroundColor: "#FFD45C",
   },
   header: {
-    backgroundColor: "#141496",
-    paddingTop: 12, 
-    paddingBottom: 20,
+    flexDirection: "row",
     alignItems: "center",
-    justifyContent: "center",
-    position: "relative",
+    backgroundColor: "#002E9D",
+    paddingTop: 50,
+    paddingBottom: 15,
+    paddingHorizontal: 20,
   },
+  
   headerTitle: {
     color: "#fff",
     fontSize: 20,
-    fontWeight: "700",
+    fontWeight: "bold",
+    marginLeft: 10,
   },
+  
   arrowBack: {
     position: "absolute",
     left: 14,
