@@ -9,7 +9,6 @@ export function PetProvider({ children }) {
   const [pets, setPets] = useState([]);
   const [isLoaded, setIsLoaded] = useState(false);
 
-  // 🔹 Carregar pets do storage
   useEffect(() => {
     const getData = async () => {
       try {
@@ -24,7 +23,6 @@ export function PetProvider({ children }) {
     getData();
   }, []);
 
-  // 🔹 Salvar pets quando mudar
   useEffect(() => {
     const storeData = async (value) => {
       try {
@@ -40,12 +38,11 @@ export function PetProvider({ children }) {
     }
   }, [pets]);
 
-  // 🔹 Adicionar pet (CORRIGIDO — NÃO APAGA A FOTO)
   const addPet = (newPet) => {
     setPets((oldPets) => [
       ...oldPets,
       {
-        ...newPet, // mantém photo, name, breed, birthDate
+        ...newPet, 
         id: Date.now().toString(),
         code: Math.floor(100000 + Math.random() * 900000).toString(),
         healthIssues: [],
@@ -56,34 +53,27 @@ export function PetProvider({ children }) {
     ]);
   };
 
-  // 🔹 Atualizar pet inteiro
   const updatePet = (id, updatedData) => {
     setPets((oldPets) =>
       oldPets.map((p) => (p.id === id ? { ...p, ...updatedData } : p))
     );
   };
 
-  // 🔹 Atualizar apenas a foto
   const updatePetImage = (id, newUri) => {
     setPets((oldPets) =>
       oldPets.map((p) => (p.id === id ? { ...p, photo: newUri } : p))
     );
   };
 
-  // 🔹 Deletar pet
   const deletePet = (id) => {
     setPets((oldPets) => oldPets.filter((p) => p.id !== id));
   };
 
-  // 🔹 Buscar pet por ID
   const getPetById = (id) => pets.find((pet) => pet.id === id);
 
-  // 🔹 Buscar pet por código
   const getPetByCode = (code) => pets.find((pet) => pet.code === code);
 
-  // -------------------------
-  // 🔹 HEALTH ISSUES
-  // -------------------------
+
   const getHealthIssues = (petId) =>
     pets.find((p) => p.id === petId)?.healthIssues || [];
 
@@ -93,9 +83,6 @@ export function PetProvider({ children }) {
     );
   };
 
-  // -------------------------
-  // 🔹 FOOD
-  // -------------------------
   const getFood = (petId) =>
     pets.find((p) => p.id === petId)?.food || {
       tipoRacao: "",
@@ -108,10 +95,6 @@ export function PetProvider({ children }) {
       prev.map((p) => (p.id === petId ? { ...p, food: foodData } : p))
     );
   };
-
-  // -------------------------
-  // 🔹 VACCINES
-  // -------------------------
   const getVaccines = (petId) =>
     pets.find((p) => p.id === petId)?.vaccines || [];
 
@@ -121,9 +104,6 @@ export function PetProvider({ children }) {
     );
   };
 
-  // -------------------------
-  // 🔹 CONTACT
-  // -------------------------
   const getContact = (petId) =>
     pets.find((p) => p.id === petId)?.contact || { telefone: "", email: "" };
 

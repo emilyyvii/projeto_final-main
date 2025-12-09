@@ -9,7 +9,7 @@ export default function AddPet() {
   const { addPet } = usePetContext();
   const [name, setName] = useState("");
   const [breed, setBreed] = useState("");
-  const [birthDate, setBirthDate] = useState(""); // <-- novo campo
+  const [birthDate, setBirthDate] = useState(""); 
   const [photo, setPhoto] = useState("");
 
   const handlePickImage = async () => {
@@ -32,7 +32,7 @@ export default function AddPet() {
       id: String(Date.now()), 
       name,
       breed,
-      birthDate, // <-- salvando data
+      birthDate, 
       photo,
     };
 

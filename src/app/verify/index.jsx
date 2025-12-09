@@ -15,7 +15,6 @@ import usePetContext from "../../components/context/usePetContext";
 export default function Verify() {
   const { getPetById } = usePetContext();
   const { mode } = useLocalSearchParams(); 
-  // mode = "professional" ou "found"
 
   const [code, setCode] = useState("");
 
@@ -32,7 +31,6 @@ export default function Verify() {
       return;
     }
 
-    // 🔥 Se for PROFISSIONAL → vai para ficha (PetDetail)
     if (mode === "professional") {
       router.push({
         pathname: `/petdetail/${pet.id}`,
@@ -41,7 +39,6 @@ export default function Verify() {
       return;
     }
 
-    // 🔥 Se for ENCONTREI O PET → vai para CONTACT com foto e nome
     if (mode === "found") {
       router.push({
         pathname: "/contact",
@@ -55,7 +52,6 @@ export default function Verify() {
       return;
     }
 
-    // fallback caso mode não venha
     Alert.alert("Erro", "Modo de acesso inválido. Tente novamente.");
   }
 

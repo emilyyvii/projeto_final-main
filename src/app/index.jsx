@@ -10,7 +10,6 @@ export default function Index() {
     <View style={styles.container}>
       <Image style={styles.img} source={require("@/assets/imagens/1.png")} />
 
-      {/* PROFISSIONAL → modo normal */}
       <TouchableOpacity
         style={styles.button}
         onPress={() => router.push("/verify")}
@@ -18,7 +17,6 @@ export default function Index() {
         <Text style={styles.title}>PROFISSIONAL</Text>
       </TouchableOpacity>
 
-      {/* ENCONTREI O PET → manda ?mode=found */}
       <TouchableOpacity
         style={styles.button}
         onPress={() => router.push("/verify?mode=found")}

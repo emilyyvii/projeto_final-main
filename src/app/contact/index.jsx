@@ -22,8 +22,7 @@ export default function Contact() {
 
   const isReadOnly = readonly === "true";
 
-  // 🔥 Correção importante:
-  // quando petPhoto vem "undefined", "null" ou "", NÃO tenta carregar
+  
   const fotoValida =
     petPhoto &&
     petPhoto !== "undefined" &&
@@ -91,7 +90,6 @@ export default function Contact() {
         {fotoValida ? (
           <Image source={{ uri: petPhoto }} style={styles.petImage} />
         ) : (
-          // 🔥 fallback só se REALMENTE não tiver foto
           <Image
             source={require("@/assets/imagens/1.png")}
             style={styles.petImage}

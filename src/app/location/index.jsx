@@ -9,7 +9,6 @@ export default function LocationScreen() {
   const { pets } = usePetContext();
   const [positions, setPositions] = useState({});
 
-  // posição inicial
   useEffect(() => {
     const initial = {};
     pets.forEach((pet) => {
@@ -21,7 +20,6 @@ export default function LocationScreen() {
     setPositions(initial);
   }, [pets]);
 
-  // movimento simulado
   useEffect(() => {
     const interval = setInterval(() => {
       setPositions((prev) => {
@@ -69,7 +67,6 @@ export default function LocationScreen() {
         ))}
       </MapView>
 
-      {/* RODAPÉ */}
       <View style={styles.footerWrapper}>
         <ScrollView
           horizontal
@@ -118,7 +115,6 @@ const styles = StyleSheet.create({
     flex: 1,
   },
 
-  // Foto no mapa
   petIcon: {
     width: 50,
     height: 50,

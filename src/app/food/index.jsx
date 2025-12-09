@@ -140,7 +140,6 @@ export default function Food() {
         <Text style={styles.titleTop}>Alimentação</Text>
       </View>
 
-      {/* --- FOTO DO PET IGUAL HEALTH --- */}
       <Image
         source={
           petPhoto
@@ -150,12 +149,10 @@ export default function Food() {
         style={styles.petImage}
       />
 
-      {/* --- NOME DO PET IGUAL HEALTH --- */}
       <Text style={styles.petName}>{petName}</Text>
 
       <ScrollView contentContainerStyle={{ alignItems: "center", paddingBottom: 70 }}>
         
-        {/* ----------- DIETA ----------- */}
         <View style={styles.card}>
           <Text style={styles.title}>Dieta Atual</Text>
 
@@ -264,7 +261,6 @@ export default function Food() {
           ))}
         </View>
 
-        {/* ----------- ALIMENTOS A EVITAR ----------- */}
         <View style={styles.card}>
           <Text style={styles.title}>Alimentos a evitar</Text>
 
@@ -370,7 +366,6 @@ const styles = StyleSheet.create({
     marginLeft: 12,
   },
 
-  // --- MESMOS DO HEALTH ---
   petImage: {
     width: 95,
     height: 95,

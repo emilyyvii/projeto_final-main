@@ -55,7 +55,6 @@ export default function Report() {
   return (
     <SafeAreaView style={[styles.safeArea, { paddingTop: STATUSBAR_HEIGHT }]}>
       <View style={styles.container}>
-        {/* Header */}
         <View style={styles.header}>
           <Pressable style={styles.arrowBack} onPress={() => router.navigate("/home")}>
             <Ionicons name="arrow-back" size={26} color="#FFD400" />
@@ -119,7 +118,6 @@ export default function Report() {
             </View>
           </View>
 
-          {/* final spacing */}
           <View style={{ height: 40 }} />
         </ScrollView>
       </View>
