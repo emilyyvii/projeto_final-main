@@ -8,11 +8,9 @@ export default function Index() {
 
   return (
     <View style={styles.container}>
-      <Image
-        style={styles.img}
-        source={require("@/assets/imagens/1.png")}
-      />
+      <Image style={styles.img} source={require("@/assets/imagens/1.png")} />
 
+      {/* PROFISSIONAL → modo normal */}
       <TouchableOpacity
         style={styles.button}
         onPress={() => router.push("/verify")}
@@ -20,9 +18,10 @@ export default function Index() {
         <Text style={styles.title}>PROFISSIONAL</Text>
       </TouchableOpacity>
 
+      {/* ENCONTREI O PET → manda ?mode=found */}
       <TouchableOpacity
         style={styles.button}
-        onPress={() => router.push("/contact?readonly=true")}
+        onPress={() => router.push("/verify?mode=found")}
       >
         <Text style={styles.title}>ENCONTREI O PET</Text>
       </TouchableOpacity>

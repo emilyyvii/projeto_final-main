@@ -40,44 +40,50 @@ export function PetProvider({ children }) {
     }
   }, [pets]);
 
-  // 🔹 Adicionar pet
+  // 🔹 Adicionar pet (CORRIGIDO — NÃO APAGA A FOTO)
   const addPet = (newPet) => {
     setPets((oldPets) => [
       ...oldPets,
       {
-        ...newPet,
+        ...newPet, // mantém photo, name, breed, birthDate
         id: Date.now().toString(),
         code: Math.floor(100000 + Math.random() * 900000).toString(),
         healthIssues: [],
         food: { tipoRacao: "", quantidade: "", evitar: "" },
         vaccines: [],
         contact: { telefone: "", email: "" },
-        photo: "",
       },
     ]);
   };
 
-  // 🔹 Atualizar pet
+  // 🔹 Atualizar pet inteiro
   const updatePet = (id, updatedData) => {
     setPets((oldPets) =>
       oldPets.map((p) => (p.id === id ? { ...p, ...updatedData } : p))
     );
   };
 
+  // 🔹 Atualizar apenas a foto
   const updatePetImage = (id, newUri) => {
     setPets((oldPets) =>
       oldPets.map((p) => (p.id === id ? { ...p, photo: newUri } : p))
     );
   };
 
+  // 🔹 Deletar pet
   const deletePet = (id) => {
     setPets((oldPets) => oldPets.filter((p) => p.id !== id));
   };
 
+  // 🔹 Buscar pet por ID
   const getPetById = (id) => pets.find((pet) => pet.id === id);
+
+  // 🔹 Buscar pet por código
   const getPetByCode = (code) => pets.find((pet) => pet.code === code);
 
-  // 🔹 Health Issues
+  // -------------------------
+  // 🔹 HEALTH ISSUES
+  // -------------------------
   const getHealthIssues = (petId) =>
     pets.find((p) => p.id === petId)?.healthIssues || [];
 
@@ -87,7 +93,9 @@ export function PetProvider({ children }) {
     );
   };
 
-  // 🔹 Food
+  // -------------------------
+  // 🔹 FOOD
+  // -------------------------
   const getFood = (petId) =>
     pets.find((p) => p.id === petId)?.food || {
       tipoRacao: "",
@@ -101,7 +109,9 @@ export function PetProvider({ children }) {
     );
   };
 
-  // 🔹 Vaccines
+  // -------------------------
+  // 🔹 VACCINES
+  // -------------------------
   const getVaccines = (petId) =>
     pets.find((p) => p.id === petId)?.vaccines || [];
 
@@ -111,7 +121,9 @@ export function PetProvider({ children }) {
     );
   };
 
-  // 🔹 Contact
+  // -------------------------
+  // 🔹 CONTACT
+  // -------------------------
   const getContact = (petId) =>
     pets.find((p) => p.id === petId)?.contact || { telefone: "", email: "" };
 
