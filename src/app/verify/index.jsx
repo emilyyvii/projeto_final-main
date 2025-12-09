@@ -1,10 +1,22 @@
 import React, { useState } from "react";
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from "react-native";
-import { router } from "expo-router";
+import {
+  View,
+  Text,
+  Pressable,
+  TextInput,
+  TouchableOpacity,
+  StyleSheet,
+  Alert,
+} from "react-native";
+import { Ionicons } from "@expo/vector-icons";
+import { router, useLocalSearchParams } from "expo-router";
 import usePetContext from "../../components/context/usePetContext";
 
 export default function Verify() {
   const { getPetById } = usePetContext();
+  const { mode } = useLocalSearchParams(); 
+  // mode = "professional" ou "found"
+
   const [code, setCode] = useState("");
 
   function handleAccess() {
@@ -20,14 +32,39 @@ export default function Verify() {
       return;
     }
 
-    router.push({
-      pathname: `/petdetail/${pet.id}`,
-      params: { readonly: "true" },
-    });
+    // 🔥 Se for PROFISSIONAL → vai para ficha (PetDetail)
+    if (mode === "professional") {
+      router.push({
+        pathname: `/petdetail/${pet.id}`,
+        params: { readonly: "true" },
+      });
+      return;
+    }
+
+    // 🔥 Se for ENCONTREI O PET → vai para CONTACT com foto e nome
+    if (mode === "found") {
+      router.push({
+        pathname: "/contact",
+        params: {
+          readonly: "true",
+          petId: String(pet.id),
+          petName: pet.name,
+          petPhoto: pet.photo || "",
+        },
+      });
+      return;
+    }
+
+    // fallback caso mode não venha
+    Alert.alert("Erro", "Modo de acesso inválido. Tente novamente.");
   }
 
   return (
     <View style={styles.container}>
+      <Pressable style={styles.arrowBack} onPress={() => router.back()}>
+        <Ionicons name="arrow-back" size={28} color="#fdcb58" />
+      </Pressable>
+
       <Text style={styles.title}>Verificar Informações do Pet</Text>
 
       <TextInput
@@ -51,6 +88,9 @@ const styles = StyleSheet.create({
     backgroundColor: "#141496",
     padding: 20,
     justifyContent: "center",
+  },
+  arrowBack: {
+    bottom: 280,
   },
   title: {
     color: "#fff",
