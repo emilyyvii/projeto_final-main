@@ -1,205 +1,261 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
   TextInput,
   TouchableOpacity,
-  StyleSheet,
-  FlatList,
-  Pressable,
   ScrollView,
+  StyleSheet,
   Image,
+  TouchableWithoutFeedback,
 } from "react-native";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { Ionicons } from "@expo/vector-icons";
-import { useRouter, useLocalSearchParams } from "expo-router";
-import usePetContext from "../../components/context/usePetContext";
+import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 
-export default function VacinasScreen() {
+export default function Vacine() {
   const router = useRouter();
-
-  const { readonly, petId, petName: paramPetName, petPhoto: paramPetPhoto } =
-    useLocalSearchParams();
-
+  const { petId, readonly, petName, petPhoto } = useLocalSearchParams();
   const isReadOnly = readonly === "true";
-  const STORAGE_KEY = `@vacinas_${petId}`;
 
-  const { pets } = usePetContext();
-  const petFromContext = pets.find((p) => String(p.id) === String(petId));
-  const petName = paramPetName ?? petFromContext?.name ?? "";
-  const petPhoto = paramPetPhoto ?? petFromContext?.photo ?? "";
-
-  const [vacinas, setVacinas] = useState([]);
+  const [vacineIssues, setVacineIssues] = useState([]);
+  const [newIssue, setNewIssue] = useState("");
+  const [newDate, setNewDate] = useState("");
+  const [showInput, setShowInput] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
+
+  const STORAGE_KEY = `@vacine_issues_${petId}`;
 
   useEffect(() => {
     if (!petId) return;
 
-    const load = async () => {
+    const loadVacineIssues = async () => {
       try {
-        const saved = await AsyncStorage.getItem(STORAGE_KEY);
-        if (saved) setVacinas(JSON.parse(saved));
-      } catch (err) {
-        console.log("Erro ao carregar vacinas:", err);
+        const storedData = await AsyncStorage.getItem(STORAGE_KEY);
+        if (storedData) {
+          setVacineIssues(JSON.parse(storedData));
+        }
+      } catch (error) {
+        console.log("Erro ao carregar vacinas:", error);
       } finally {
         setIsLoaded(true);
       }
     };
 
-    load();
+    loadVacineIssues();
   }, [petId]);
 
   useEffect(() => {
     if (!isLoaded) return;
     if (isReadOnly) return;
 
-    const save = async () => {
+    const saveVacineIssues = async () => {
       try {
-        await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(vacinas));
-      } catch (err) {
-        console.log("Erro ao salvar vacinas:", err);
+        await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(vacineIssues));
+      } catch (error) {
+        console.log("Erro ao salvar vacinas:", error);
       }
     };
 
-    save();
-  }, [vacinas, isLoaded, isReadOnly]);
+    saveVacineIssues();
+  }, [vacineIssues, isLoaded, isReadOnly]);
 
-  const addVacina = () => {
-    if (isReadOnly) return;
-
-    const nova = {
-      id: Date.now().toString(),
-      nome: "",
-      aplicacao: "",
-      validade: "",
-    };
-
-    setVacinas((prev) => [...prev, nova]);
+  const handleAdd = () => {
+    if (newIssue.trim()) {
+      const newItem = {
+        id: Date.now().toString(),
+        text: newIssue,
+        date: newDate,
+        editing: false,
+      };
+      setVacineIssues((prev) => [...prev, newItem]);
+      setNewIssue("");
+      setNewDate("");
+      setShowInput(false);
+    }
   };
 
-  const editarCampo = (id, campo, valor) => {
+  const handleDelete = (id) => {
     if (isReadOnly) return;
+    setVacineIssues((prev) => prev.filter((item) => item.id !== id));
+  };
 
-    setVacinas((prev) =>
-      prev.map((v) => (v.id === id ? { ...v, [campo]: valor } : v))
+  const handleEdit = (id, newText, newDateValue, editingState) => {
+    setVacineIssues((prev) =>
+      prev.map((item) =>
+        item.id === id
+          ? {
+              ...item,
+              text: newText !== undefined ? newText : item.text,
+              date: newDateValue !== undefined ? newDateValue : item.date,
+              editing:
+                editingState !== undefined ? editingState : item.editing,
+            }
+          : item
+      )
     );
   };
-
-  const excluirVacina = (id) => {
-    if (isReadOnly) return;
-    setVacinas((prev) => prev.filter((v) => v.id !== id));
-  };
-
-  const renderItem = ({ item }) => (
-    <View style={styles.row}>
-      {!isReadOnly ? (
-        <TextInput
-          style={[styles.cell, { flex: 2 }]}
-          placeholder="Nome da Vacina"
-          placeholderTextColor="#ddd"
-          value={item.nome}
-          onChangeText={(t) => editarCampo(item.id, "nome", t)}
-        />
-      ) : (
-        <Text style={[styles.cellTextOnly, { flex: 2 }]}>
-          {item.nome || "-"}
-        </Text>
-      )}
-
-      {!isReadOnly ? (
-        <TextInput
-          style={styles.cell}
-          placeholder="Data"
-          placeholderTextColor="#ddd"
-          value={item.aplicacao}
-          onChangeText={(t) => editarCampo(item.id, "aplicacao", t)}
-        />
-      ) : (
-        <Text style={styles.cellTextOnly}>{item.aplicacao || "-"}</Text>
-      )}
-
-      {!isReadOnly ? (
-        <TextInput
-          style={styles.cell}
-          placeholder="Validade"
-          placeholderTextColor="#ddd"
-          value={item.validade}
-          onChangeText={(t) => editarCampo(item.id, "validade", t)}
-        />
-      ) : (
-        <Text style={styles.cellTextOnly}>{item.validade || "-"}</Text>
-      )}
-
-      {!isReadOnly && (
-        <TouchableOpacity onPress={() => excluirVacina(item.id)}>
-          <Ionicons name="trash" size={22} color="#fff" style={styles.trash} />
-        </TouchableOpacity>
-      )}
-    </View>
-  );
-
-  if (!petId) {
-    return (
-      <View style={styles.container}>
-        <Text style={{ color: "#fff", textAlign: "center", marginTop: 50 }}>
-          Pet não encontrado
-        </Text>
-      </View>
-    );
-  }
 
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Pressable onPress={() => router.back()}>
+        <TouchableWithoutFeedback onPress={() => router.back()}>
           <Ionicons name="arrow-back" size={28} color="#fdcb58" />
-        </Pressable>
+        </TouchableWithoutFeedback>
         <Text style={styles.headerTitle}>Vacinas</Text>
+        <View />
       </View>
 
       <View style={styles.petInfo}>
         <Image
-          source={petPhoto ? { uri: petPhoto } : require("@/assets/imagens/1.png")}
+          source={
+            petPhoto ? { uri: petPhoto } : require("@/assets/imagens/1.png")
+          }
           style={styles.petImage}
         />
         <Text style={styles.petName}>{petName}</Text>
       </View>
 
-      <View style={styles.tableVaccine}>
-        <View style={[styles.row, styles.columTable]}>
-          <Text style={[styles.headerCell, { flex: 2 }]}>Vacinas</Text>
-          <Text style={styles.headerCell}>Data</Text>
-          <Text style={styles.headerCell}>Validade</Text>
-          <View style={{ width: 30 }} />
-        </View>
-
-        <ScrollView style={{ maxHeight: 370 }}>
-          <FlatList
-            data={vacinas}
-            keyExtractor={(item) => item.id}
-            renderItem={renderItem}
-            scrollEnabled={false}
-            ListEmptyComponent={
-              <Text style={styles.emptyText}>Nenhuma vacina cadastrada</Text>
-            }
-          />
-        </ScrollView>
-
-        {!isReadOnly && (
-          <TouchableOpacity style={styles.addButton} onPress={addVacina}>
-            <Ionicons name="add" size={28} color="#fdcb58" />
+      <View style={styles.contentVacine}>
+        {!showInput ? (
+          <TouchableOpacity
+            style={[styles.addIconContainer, isReadOnly && { opacity: 0.3 }]}
+            onPress={() => !isReadOnly && setShowInput(true)}
+            disabled={isReadOnly}
+          >
+            <Ionicons name="add" size={28} color="#142A8C" />
           </TouchableOpacity>
+        ) : (
+          <View style={styles.inputGroup}>
+            <Text style={styles.label}>Vacina aplicada</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="Descreva a vacina..."
+              placeholderTextColor="#ccc"
+              value={newIssue}
+              onChangeText={setNewIssue}
+            />
+
+            <Text style={[styles.label, { marginTop: 12 }]}>
+              Data de aplicação
+            </Text>
+            <TextInput
+              style={styles.input}
+              placeholder="Ex: 10/02/2025"
+              placeholderTextColor="#ccc"
+              value={newDate}
+              onChangeText={setNewDate}
+            />
+
+            <TouchableOpacity
+              style={styles.addButton}
+              onPress={handleAdd}
+              disabled={isReadOnly}
+            >
+              <Text style={styles.addText}>Salvar</Text>
+            </TouchableOpacity>
+          </View>
         )}
+
+        <ScrollView style={styles.list}>
+          {vacineIssues.length === 0 ? (
+            <Text style={styles.emptyText}>
+              Nenhuma vacina registrada ainda.
+            </Text>
+          ) : (
+            vacineIssues.map((item) => (
+              <View key={item.id} style={styles.itemBox}>
+                {item.editing ? (
+                  <>
+                    <Text style={styles.label}>Vacina aplicada</Text>
+                    <TextInput
+                      style={styles.input}
+                      value={item.text}
+                      onChangeText={(text) =>
+                        handleEdit(item.id, text, item.date)
+                      }
+                      placeholder="Descreva a vacina..."
+                      placeholderTextColor="#ccc"
+                    />
+
+                    <Text style={[styles.label, { marginTop: 10 }]}>
+                      Data de aplicação
+                    </Text>
+                    <TextInput
+                      style={styles.input}
+                      value={item.date}
+                      onChangeText={(date) =>
+                        handleEdit(item.id, item.text, date)
+                      }
+                      placeholder="Ex: 12/03/2025"
+                      placeholderTextColor="#ccc"
+                    />
+
+                    <TouchableOpacity
+                      onPress={() =>
+                        handleEdit(item.id, item.text, item.date, false)
+                      }
+                      style={[styles.addButton, { marginTop: 12 }]}
+                    >
+                      <Text style={styles.addText}>Salvar edição</Text>
+                    </TouchableOpacity>
+                  </>
+                ) : (
+                  <>
+                    <Text style={styles.itemText}>{item.text}</Text>
+                    {item.date ? (
+                      <Text style={styles.itemDate}>
+                        Aplicada em: {item.date}
+                      </Text>
+                    ) : null}
+
+                    {!isReadOnly && (
+                      <View
+                        style={{
+                          flexDirection: "row",
+                          marginTop: 10,
+                          gap: 15,
+                        }}
+                      >
+                        <TouchableOpacity
+                          onPress={() =>
+                            handleEdit(
+                              item.id,
+                              item.text,
+                              item.date,
+                              true
+                            )
+                          }
+                        >
+                          <MaterialIcons name="edit"
+                            size={22}
+                            color="#142A8C"
+                          />
+                        </TouchableOpacity>
+
+                        <TouchableOpacity
+                          onPress={() => handleDelete(item.id)}
+                        >
+                          <MaterialIcons name="delete"
+                            size={22}
+                            color="red"
+                          />
+                        </TouchableOpacity>
+                      </View>
+                    )}
+                  </>
+                )}
+              </View>
+            ))
+          )}
+        </ScrollView>
       </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#fdcb58",
-  },
+  container: { flex: 1, backgroundColor: "#fdcb58" },
 
   header: {
     flexDirection: "row",
@@ -217,11 +273,7 @@ const styles = StyleSheet.create({
     marginLeft: 10,
   },
 
-  petInfo: {
-    alignItems: "center",
-    marginTop: 25,
-    marginBottom: 10,
-  },
+  petInfo: { alignItems: "center", marginTop: 25, marginBottom: 10 },
 
   petImage: {
     width: 95,
@@ -238,69 +290,89 @@ const styles = StyleSheet.create({
     marginTop: 10,
   },
 
-  tableVaccine: {
-    marginTop: 25,
+  contentVacine: {
+    backgroundColor: "#142A8C",
+    borderRadius: 14,
+    padding: 16,
     width: "90%",
-    alignSelf: "center",
-    flex: 1,
-  },
-
-  columTable: {
-    backgroundColor: "#141496",
-    borderRadius: 10,
-  },
-
-  headerCell: {
-    flex: 1,
-    color: "#fff",
-    fontWeight: "bold",
-    paddingVertical: 10,
-  },
-
-  row: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "#2e63ce",
-    borderRadius: 10,
-    marginVertical: 4,
-    paddingHorizontal: 8,
-    paddingVertical: 6,
-  },
-
-  cell: {
-    flex: 1,
-    fontSize: 14,
-    paddingHorizontal: 4,
-    paddingVertical: 10,
-    color: "#fff",
-  },
-
-  cellTextOnly: {
-    flex: 1,
-    fontSize: 14,
-    paddingHorizontal: 4,
-    paddingVertical: 10,
-    color: "#fff",
-  },
-
-  trash: {
-    padding: 6,
-  },
-
-  addButton: {
-    backgroundColor: "#141496",
-    width: 45,
-    height: 45,
-    borderRadius: 50,
-    alignItems: "center",
-    justifyContent: "center",
     alignSelf: "center",
     marginTop: 20,
   },
 
+  addIconContainer: {
+    marginBottom: 16,
+    borderRadius: 50,
+    backgroundColor: "#fdcb58",
+    width: 45,
+    height: 45,
+    alignItems: "center",
+    justifyContent: "center",
+    alignSelf: "center",
+    marginTop: 20,
+    shadowColor: "#000",
+    shadowOpacity: 0.2,
+    shadowRadius: 3,
+  },
+
+  inputGroup: { marginBottom: 12 },
+
+  label: {
+    color: "#fdcb58",
+    fontSize: 14,
+    fontWeight: "600",
+    marginBottom: 4,
+  },
+
+  input: {
+    borderWidth: 1,
+    borderColor: "#fdcb58",
+    borderRadius: 8,
+    paddingHorizontal: 10,
+    color: "#fff",
+    height: 40,
+  },
+
+  addButton: {
+    backgroundColor: "#fdcb58",
+    paddingVertical: 10,
+    borderRadius: 8,
+    marginTop: 14,
+    alignItems: "center",
+  },
+
+  addText: { 
+    color: "black", 
+    fontWeight: "bold" 
+  },
+
+  list: { marginTop: 8 },
+
   emptyText: {
     textAlign: "center",
-    color: "#002E9D",
-    marginTop: 10,
+    color: "#fdcb58",
+    marginTop: 20,
+    marginBottom: 20,
+    fontSize: 16,
+   
+    
+  },
+
+  itemBox: {
+    backgroundColor: "#fff",
+    padding: 12,
+    borderRadius: 15,
+    marginBottom: 10,
+  },
+
+  itemText: { 
+    color: "#000", 
+    fontSize: 16,
+    fontWeight: "bold"
+  },
+
+  itemDate: { 
+    color: "#000", 
+    marginTop: 4, 
+    fontSize: 14 
   },
 });

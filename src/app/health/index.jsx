@@ -1,18 +1,9 @@
 import React, { useEffect, useState } from "react";
-import {
-  View,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  ScrollView,
-  StyleSheet,
-  Image,
-  TouchableWithoutFeedback,
-} from "react-native";
+import {View,Text,TextInput,TouchableOpacity,ScrollView,StyleSheet,Image,TouchableWithoutFeedback,} from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Ionicons } from "@expo/vector-icons";
-import HealthItem from "../../components/HealthItem";
+import HealthItem from "../../components/Item";
 
 export default function Health() {
   const router = useRouter();
@@ -94,7 +85,6 @@ export default function Health() {
 
   return (
     <View style={styles.container}>
-      {/* ===== HEADER ===== */}
       <View style={styles.header}>
         <TouchableWithoutFeedback onPress={() => router.back()}>
           <Ionicons name="arrow-back" size={28} color="#fdcb58" />

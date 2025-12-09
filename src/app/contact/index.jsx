@@ -1,7 +1,4 @@
 import { useState, useEffect } from "react";
-<<<<<<< HEAD
-import { View,Text,StyleSheet,TextInput, Pressable, Keyboard,} from "react-native";
-=======
 import {
   View,
   Text,
@@ -11,25 +8,30 @@ import {
   Keyboard,
   Image,
 } from "react-native";
->>>>>>> 1ca9aa5462a958c6c06fd2196e0b2a5116e49fb0
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { MaterialIcons, Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
+
 const KEY_TELEFONE = "@contact_telefone";
 const KEY_EMAIL = "@contact_email";
+
 
 export default function Contact() {
   const router = useRouter();
 
+
   const { readonly, petName, petPhoto } = useLocalSearchParams();
 
+
   const isReadOnly = readonly === "true";
+
 
   const [telefone, setTelefone] = useState("");
   const [email, setEmail] = useState("");
   const [editandoTelefone, setEditandoTelefone] = useState(false);
   const [editandoEmail, setEditandoEmail] = useState(false);
+
 
   useEffect(() => {
     (async () => {
@@ -44,6 +46,7 @@ export default function Contact() {
     })();
   }, []);
 
+
   const saveToStorage = async (key, value) => {
     try {
       await AsyncStorage.setItem(key, value ?? "");
@@ -52,8 +55,10 @@ export default function Contact() {
     }
   };
 
+
   const toggleEditTelefone = () => {
     if (isReadOnly) return;
+
 
     const novo = !editandoTelefone;
     if (editandoTelefone && !novo) {
@@ -63,8 +68,10 @@ export default function Contact() {
     setEditandoTelefone(novo);
   };
 
+
   const toggleEditEmail = () => {
     if (isReadOnly) return;
+
 
     const novo = !editandoEmail;
     if (editandoEmail && !novo) {
@@ -74,6 +81,7 @@ export default function Contact() {
     setEditandoEmail(novo);
   };
 
+
   return (
     <View style={styles.container}>
       <View style={styles.header}>
@@ -82,6 +90,7 @@ export default function Contact() {
         </Pressable>
         <Text style={styles.headerTitle}>Informações de contato</Text>
       </View>
+
 
       <View style={styles.petInfo}>
         <Image
@@ -95,11 +104,14 @@ export default function Contact() {
         <Text style={styles.petName}>{petName}</Text>
       </View>
 
+
       <View style={styles.Content}>
+
 
         <View style={styles.infoBox}>
           <View style={styles.infoHeader}>
             <Text style={styles.label}>Número de telefone</Text>
+
 
             {!isReadOnly && (
               <Pressable onPress={toggleEditTelefone}>
@@ -107,6 +119,7 @@ export default function Contact() {
               </Pressable>
             )}
           </View>
+
 
           {editandoTelefone && !isReadOnly ? (
             <TextInput
@@ -122,14 +135,10 @@ export default function Contact() {
             <Text style={styles.value}>{telefone || "—"}</Text>
           )}
         </View>
-<<<<<<< HEAD
-
-=======
-        
->>>>>>> 1ca9aa5462a958c6c06fd2196e0b2a5116e49fb0
         <View style={styles.infoBox}>
           <View style={styles.infoHeader}>
             <Text style={styles.label}>E-mail</Text>
+
 
             {!isReadOnly && (
               <Pressable onPress={toggleEditEmail}>
@@ -137,6 +146,7 @@ export default function Contact() {
               </Pressable>
             )}
           </View>
+
 
           {editandoEmail && !isReadOnly ? (
             <TextInput
@@ -155,10 +165,12 @@ export default function Contact() {
           )}
         </View>
 
+
       </View>
     </View>
   );
 }
+
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#F7C843" },
@@ -176,6 +188,7 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     marginLeft: 10,
   },
+
 
   petInfo: {
     alignItems: "center",
@@ -195,6 +208,7 @@ const styles = StyleSheet.create({
     color: "#002E9D",
     marginTop: 10,
   },
+
 
   Content: { marginTop: 20 },
   infoBox: {

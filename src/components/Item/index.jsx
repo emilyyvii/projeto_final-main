@@ -12,7 +12,6 @@ export default function HealthItem({ item, onEdit, onDelete, isReadOnly }) {
   const [isEditing, setIsEditing] = useState(false);
   const [editedText, setEditedText] = useState(item.text);
 
-  // 🔥 se readonly ativar enquanto edita, fecha edição
   useEffect(() => {
     if (isReadOnly && isEditing) {
       setIsEditing(false);

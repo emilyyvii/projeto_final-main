@@ -1,9 +1,10 @@
-import { View, Pressable, Text, TextInput, StyleSheet } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
+import {View,Text,TextInput,StyleSheet,Pressable,TouchableOpacity,ScrollView} from "react-native";
+import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { router, useLocalSearchParams } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useState, useEffect } from "react";
 import usePetContext from "../../components/context/usePetContext";
+
 
 export default function Food() {
   const { petId, readonly } = useLocalSearchParams();
@@ -12,21 +13,27 @@ export default function Food() {
   const { pets } = usePetContext();
   const pet = pets.find((p) => String(p.id) === String(petId));
 
-  const [tipoRacao, setTipoRacao] = useState("");
-  const [quantidade, setQuantidade] = useState("");
-  const [evitar, setEvitar] = useState("");
+  const [dietItems, setDietItems] = useState([]);
+  const [avoidItems, setAvoidItems] = useState([]);
 
-  const STORAGE_KEY = `@food_data_${petId}`;
+  const [newFood, setNewFood] = useState("");
+  const [newQuantity, setNewQuantity] = useState("");
+  const [showDietInput, setShowDietInput] = useState(false);
 
+  const [newAvoid, setNewAvoid] = useState("");
+  const [showAvoidInput, setShowAvoidInput] = useState(false);
+
+  const STORAGE_KEY = `@food_lists_${petId}`;
+
+  
   useEffect(() => {
     const loadData = async () => {
       try {
         const saved = await AsyncStorage.getItem(STORAGE_KEY);
         if (saved) {
           const data = JSON.parse(saved);
-          setTipoRacao(data.tipoRacao || "");
-          setQuantidade(data.quantidade || "");
-          setEvitar(data.evitar || "");
+          setDietItems(data.dietItems || []);
+          setAvoidItems(data.avoidItems || []);
         }
       } catch (e) {
         console.log(e);
@@ -35,25 +42,93 @@ export default function Food() {
     loadData();
   }, [petId]);
 
+
   useEffect(() => {
     if (isReadOnly) return;
+
     const saveData = async () => {
       await AsyncStorage.setItem(
         STORAGE_KEY,
-        JSON.stringify({ tipoRacao, quantidade, evitar })
+        JSON.stringify({ dietItems, avoidItems })
       );
     };
+
     saveData();
-  }, [tipoRacao, quantidade, evitar, petId, isReadOnly]);
+  }, [dietItems, avoidItems, isReadOnly]);
 
-  const limparCampo = (campo) => {
-    if (isReadOnly) return;
+  const addDietItem = () => {
+    if (!newFood.trim() || !newQuantity.trim()) return;
 
-    if (campo === "tipoRacao") setTipoRacao("");
-    if (campo === "quantidade") setQuantidade("");
-    if (campo === "evitar") setEvitar("");
+    setDietItems((prev) => [
+      ...prev,
+      {
+        id: Date.now().toString(),
+        food: newFood,
+        quantity: newQuantity,
+        editing: false,
+      },
+    ]);
+
+    setNewFood("");
+    setNewQuantity("");
+    setShowDietInput(false);
   };
 
+  const addAvoidItem = () => {
+    if (!newAvoid.trim()) return;
+
+    setAvoidItems((prev) => [
+      ...prev,
+      { id: Date.now().toString(), text: newAvoid, editing: false },
+    ]);
+
+    setNewAvoid("");
+    setShowAvoidInput(false);
+  };
+
+  const toggleEditDiet = (id) => {
+    setDietItems((items) =>
+      items.map((it) =>
+        it.id === id ? { ...it, editing: !it.editing } : it
+      )
+    );
+  };
+
+  const saveDietEdit = (id, newFood, newQuantity) => {
+    setDietItems((items) =>
+      items.map((it) =>
+        it.id === id
+          ? { ...it, food: newFood, quantity: newQuantity, editing: false }
+          : it
+      )
+    );
+  };
+
+  const deleteDiet = (id) => {
+    if (isReadOnly) return;
+    setDietItems((items) => items.filter((it) => it.id !== id));
+  };
+
+  const toggleEditAvoid = (id) => {
+    setAvoidItems((items) =>
+      items.map((it) =>
+        it.id === id ? { ...it, editing: !it.editing } : it
+      )
+    );
+  };
+
+  const saveAvoidEdit = (id, newText) => {
+    setAvoidItems((items) =>
+      items.map((it) =>
+        it.id === id ? { ...it, text: newText, editing: false } : it
+      )
+    );
+  };
+
+  const deleteAvoid = (id) => {
+    if (isReadOnly) return;
+    setAvoidItems((items) => items.filter((it) => it.id !== id));
+  };
   if (!pet) {
     return (
       <View style={styles.container}>
@@ -64,7 +139,6 @@ export default function Food() {
 
   return (
     <View style={styles.container}>
-      {/* Header */}
       <View style={styles.header}>
         <Pressable onPress={() => router.back()}>
           <Ionicons name="arrow-back" size={28} color="#fdcb58" />
@@ -72,76 +146,208 @@ export default function Food() {
         <Text style={styles.titleTop}>Alimentação</Text>
       </View>
 
-      {/* Pet name */}
       <Text style={styles.petName}>🐾 {pet.name}</Text>
 
-      <View style={styles.body}>
-        {/* Card 1 */}
+      <ScrollView contentContainerStyle={{ alignItems: "center", paddingBottom: 70 }}>
         <View style={styles.card}>
+
           <Text style={styles.title}>Dieta Atual</Text>
 
-          {/* Tipo ração */}
-          <View style={styles.inputRow}>
-            <TextInput
-              style={[styles.input, isReadOnly && styles.inputDisabled]}
-              placeholder="Informe o tipo de ração"
-              placeholderTextColor="#fff"
-              value={tipoRacao}
-              editable={!isReadOnly}
-              onChangeText={setTipoRacao}
-            />
-            {!isReadOnly && (
-              <Pressable onPress={() => limparCampo("tipoRacao")}>
-                <Ionicons name="trash" size={22} color="#fff" />
-              </Pressable>
-            )}
-          </View>
+          {!showDietInput && !isReadOnly && (
+            <TouchableOpacity
+              style={styles.addIconContainer}
+              onPress={() => setShowDietInput(true)}
+            >
+              <Ionicons name="add" size={28} color="#142A8C" />
+            </TouchableOpacity>
+          )}
 
-          {/* Quantidade */}
-          <View style={styles.inputRow}>
-            <TextInput
-              style={[styles.input, isReadOnly && styles.inputDisabled]}
-              placeholder="Informe a quantidade diária"
-              placeholderTextColor="#fff"
-              value={quantidade}
-              editable={!isReadOnly}
-              onChangeText={setQuantidade}
-            />
-            {!isReadOnly && (
-              <Pressable onPress={() => limparCampo("quantidade")}>
-                <Ionicons name="trash" size={22} color="#fff" />
-              </Pressable>
-            )}
-          </View>
+          {showDietInput && !isReadOnly && (
+            <View style={{ marginBottom: 10 }}>
+              <View style={styles.inputRow}>
+                <TextInput
+                  style={styles.input}
+                  placeholder="Alimento"
+                  placeholderTextColor="#000"
+                  value={newFood}
+                  onChangeText={setNewFood}
+                />
+              </View>
+              <View style={styles.inputRow}>
+                <TextInput
+                  style={styles.input}
+                  placeholder="Quantidade"
+                  placeholderTextColor="#000"
+                  value={newQuantity}
+                  onChangeText={setNewQuantity}
+                />
+              </View>
+
+              <TouchableOpacity style={styles.saveButton} onPress={addDietItem}>
+                <Text style={styles.saveText}>Salvar</Text>
+              </TouchableOpacity>
+            </View>
+          )}
+
+          {dietItems.map((item) => (
+            <View key={item.id} style={styles.listItem}>
+              {item.editing ? (
+                <View style={{ width: "100%" }}>
+                  <TextInput
+                    style={styles.inputRow}
+                    placeholder="Alimento"
+                    placeholderTextColor="#000"
+                    value={item.food}
+                    onChangeText={(t) =>
+                      setDietItems((prev) =>
+                        prev.map((it) =>
+                          it.id === item.id ? { ...it, food: t } : it
+                        )
+                      )
+                    }
+                  />
+                  <TextInput
+                    style={styles.inputRow}
+                    placeholder="Quantidade"
+                    placeholderTextColor="#000"
+                    value={item.quantity}
+                    onChangeText={(t) =>
+                      setDietItems((prev) =>
+                        prev.map((it) =>
+                          it.id === item.id ? { ...it, quantity: t } : it
+                        )
+                      )
+                    }
+                  />
+
+                  <TouchableOpacity
+                    style={styles.saveButton}
+                    onPress={() =>
+                      saveDietEdit(item.id, item.food, item.quantity)
+                    }
+                  >
+                    <Text style={styles.saveText}>Salvar</Text>
+                  </TouchableOpacity>
+                </View>
+              ) : (
+                <View style={styles.rowBetween}>
+                  <View>
+                    <Text style={styles.itemText}>
+                     {item.food}
+                    </Text>
+                    <Text style={styles.itemTextSmall}>
+                      {item.quantity}
+                    </Text>
+                  </View>
+
+                  {!isReadOnly && (
+                    <View style={styles.iconRow}>
+                      <Pressable onPress={() => toggleEditDiet(item.id)}>
+                      <MaterialIcons name="edit" size={22} color="#142A8C" />
+                      </Pressable>
+
+                      <Pressable onPress={() => deleteDiet(item.id)}>
+                        <MaterialIcons name="delete"
+                          size={22}
+                          color="red"
+                          style={{ marginLeft: 10 }}
+                        />
+                     
+                      </Pressable>
+                    </View>
+                  )}
+                </View>
+              )}
+            </View>
+          ))}
         </View>
 
-        {/* Card 2 */}
         <View style={styles.card}>
           <Text style={styles.title}>Alimentos a evitar</Text>
 
-          <View style={styles.inputRow}>
-            <TextInput
-              style={[styles.input, isReadOnly && styles.inputDisabled]}
-              placeholder="Informe os alimentos a evitar"
-              placeholderTextColor="#fff"
-              value={evitar}
-              editable={!isReadOnly}
-              onChangeText={setEvitar}
-            />
-            {!isReadOnly && (
-              <Pressable onPress={() => limparCampo("evitar")}>
-                <Ionicons name="trash" size={22} color="#fff" />
-              </Pressable>
-            )}
-          </View>
+          {!showAvoidInput && !isReadOnly && (
+            <TouchableOpacity
+              style={styles.addIconContainer}
+              onPress={() => setShowAvoidInput(true)}
+            >
+              <Ionicons name="add" size={28} color="#142A8C" />
+            </TouchableOpacity>
+          )}
+
+          {showAvoidInput && !isReadOnly && (
+            <View style={{ marginBottom: 10 }}>
+              <View style={styles.inputRow}>
+                <TextInput
+                  style={styles.input}
+                  placeholder="Alimento proibido"
+                  placeholderTextColor="#000"
+                  value={newAvoid}
+                  onChangeText={setNewAvoid}
+                />
+              </View>
+
+              <TouchableOpacity style={styles.saveButton} onPress={addAvoidItem}>
+                <Text style={styles.saveText}>Salvar</Text>
+              </TouchableOpacity>
+            </View>
+          )}
+
+          {avoidItems.map((item) => (
+            <View key={item.id} style={styles.listItem}>
+              {item.editing ? (
+                <View>
+                  <TextInput
+                    style={styles.inputRow}
+                    placeholder="Alimento"
+                    placeholderTextColor="#000"
+                    value={item.text}
+                    onChangeText={(t) =>
+                      setAvoidItems((prev) =>
+                        prev.map((it) =>
+                          it.id === item.id ? { ...it, text: t } : it
+                        )
+                      )
+                    }
+                  />
+
+                  <TouchableOpacity
+                    style={styles.saveButton}
+                    onPress={() => saveAvoidEdit(item.id, item.text)}
+                  >
+                    <Text style={styles.saveText}>Salvar</Text>
+                  </TouchableOpacity>
+                </View>
+              ) : (
+                <View style={styles.rowBetween}>
+                  <Text style={styles.itemText}> {item.text}</Text>
+                  {!isReadOnly && (
+                    <View style={styles.iconRow}>
+                      <Pressable onPress={() => toggleEditAvoid(item.id)}>
+                      <MaterialIcons name="edit" size={22} color="#142A8C" />
+                      </Pressable>
+
+                      <Pressable onPress={() => deleteAvoid(item.id)}>
+                        <MaterialIcons name="delete"
+                          size={22}
+                          color="red"
+                          style={{ marginLeft: 10 }}
+                        />
+                      </Pressable>
+                    </View>
+                  )}
+                </View>
+              )}
+            </View>
+          ))}
         </View>
-      </View>
+      </ScrollView>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#F7C843" },
+
   header: {
     backgroundColor: "#142A8C",
     flexDirection: "row",
@@ -150,12 +356,14 @@ const styles = StyleSheet.create({
     paddingBottom: 15,
     paddingHorizontal: 18,
   },
+
   titleTop: {
     color: "#fff",
     fontSize: 22,
     fontWeight: "bold",
     marginLeft: 12,
   },
+
   petName: {
     textAlign: "center",
     fontSize: 20,
@@ -163,14 +371,15 @@ const styles = StyleSheet.create({
     color: "#142A8C",
     marginTop: 25,
   },
-  body: { marginTop: 50, alignItems: "center" },
+
   card: {
     backgroundColor: "#142A8C",
-    marginBottom: 20,
+    marginTop: 35,
     padding: 20,
     borderRadius: 20,
     width: 350,
   },
+
   title: {
     color: "#F7C843",
     fontSize: 22,
@@ -178,20 +387,71 @@ const styles = StyleSheet.create({
     textAlign: "center",
     marginBottom: 10,
   },
-  inputRow: {
-    flexDirection: "row",
+
+  addIconContainer: {
+    marginBottom: 16,
+    borderRadius: 50,
+    backgroundColor: "#fdcb58",
+    width: 45,
+    height: 45,
     alignItems: "center",
-    backgroundColor: "#729cf2",
+    justifyContent: "center",
+    alignSelf: "center",
+    marginTop: 10,
+  },
+
+  inputRow: {
+    backgroundColor: "#fff",
     borderRadius: 10,
     paddingHorizontal: 10,
     marginBottom: 15,
-  },
-  input: {
-    flex: 1,
-    color: "#fff",
+    color: "#000",
     paddingVertical: 8,
   },
-  inputDisabled: {
-    opacity: 0.5,
+
+  input: {
+    color: "#000",
+  },
+
+  saveButton: {
+    backgroundColor: "#fdcb58",
+    paddingVertical: 8,
+    alignItems: "center",
+    borderRadius: 10,
+    marginTop: 5,
+  },
+
+  saveText: {
+    fontWeight: "bold",
+    color: "#142A8C",
+  },
+
+  listItem: {
+    backgroundColor: "#fff",
+    borderRadius: 10,
+    padding: 12,
+    marginTop: 10,
+  },
+
+  rowBetween: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+
+  itemText: {
+    color: "#000",
+    fontSize: 16,
+    fontWeight: "bold",
+  },
+
+  itemTextSmall: {
+    color: "#000",
+    fontSize: 14,
+  },
+
+  iconRow: {
+    flexDirection: "row",
+    alignItems: "center",
   },
 });

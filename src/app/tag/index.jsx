@@ -32,7 +32,7 @@ export default function Tag() {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Pressable style={styles.arrowBack} onPress={() => router.navigate("/")}>
+        <Pressable style={styles.arrowBack} onPress={() => router.back()}>
           <Ionicons name="arrow-back" size={26} color="#FFD400" />
         </Pressable>
         <Text style={styles.title}>Tag do Pet</Text>
