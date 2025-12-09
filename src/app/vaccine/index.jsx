@@ -108,24 +108,26 @@ export default function Vacine() {
 
       <View style={styles.petInfo}>
         <Image
-          source={
-            petPhoto ? { uri: petPhoto } : require("@/assets/imagens/1.png")
-          }
+          source={petPhoto ? { uri: petPhoto } : require("@/assets/imagens/1.png")}
           style={styles.petImage}
         />
         <Text style={styles.petName}>{petName}</Text>
       </View>
 
       <View style={styles.contentVacine}>
-        {!showInput ? (
+
+        {/* Botão + só aparece para o dono */}
+        {!isReadOnly && !showInput && (
           <TouchableOpacity
-            style={[styles.addIconContainer, isReadOnly && { opacity: 0.3 }]}
-            onPress={() => !isReadOnly && setShowInput(true)}
-            disabled={isReadOnly}
+            style={styles.addIconContainer}
+            onPress={() => setShowInput(true)}
           >
             <Ionicons name="add" size={28} color="#142A8C" />
           </TouchableOpacity>
-        ) : (
+        )}
+
+        {/* Formulário de adicionar só aparece para o dono */}
+        {!isReadOnly && showInput && (
           <View style={styles.inputGroup}>
             <Text style={styles.label}>Vacina aplicada</Text>
             <TextInput
@@ -147,11 +149,7 @@ export default function Vacine() {
               onChangeText={setNewDate}
             />
 
-            <TouchableOpacity
-              style={styles.addButton}
-              onPress={handleAdd}
-              disabled={isReadOnly}
-            >
+            <TouchableOpacity style={styles.addButton} onPress={handleAdd}>
               <Text style={styles.addText}>Salvar</Text>
             </TouchableOpacity>
           </View>
@@ -209,6 +207,7 @@ export default function Vacine() {
                       </Text>
                     ) : null}
 
+                    {/* Botões só aparecem para o dono */}
                     {!isReadOnly && (
                       <View
                         style={{
@@ -227,7 +226,8 @@ export default function Vacine() {
                             )
                           }
                         >
-                          <MaterialIcons name="edit"
+                          <MaterialIcons
+                            name="edit"
                             size={22}
                             color="#142A8C"
                           />
@@ -236,10 +236,7 @@ export default function Vacine() {
                         <TouchableOpacity
                           onPress={() => handleDelete(item.id)}
                         >
-                          <MaterialIcons name="delete"
-                            size={22}
-                            color="red"
-                          />
+                          <MaterialIcons name="delete" size={22} color="red" />
                         </TouchableOpacity>
                       </View>
                     )}
@@ -340,9 +337,9 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
 
-  addText: { 
-    color: "black", 
-    fontWeight: "bold" 
+  addText: {
+    color: "black",
+    fontWeight: "bold",
   },
 
   list: { marginTop: 8 },
@@ -353,8 +350,6 @@ const styles = StyleSheet.create({
     marginTop: 20,
     marginBottom: 20,
     fontSize: 16,
-   
-    
   },
 
   itemBox: {
@@ -364,15 +359,15 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
 
-  itemText: { 
-    color: "#000", 
+  itemText: {
+    color: "#000",
     fontSize: 16,
-    fontWeight: "bold"
+    fontWeight: "bold",
   },
 
-  itemDate: { 
-    color: "#000", 
-    marginTop: 4, 
-    fontSize: 14 
+  itemDate: {
+    color: "#000",
+    marginTop: 4,
+    fontSize: 14,
   },
 });

@@ -1,20 +1,28 @@
 import Button from "@/components/Button";
 import { router } from "expo-router";
-import {Image,View,Text,Pressable,StyleSheet,TextInput,Alert,KeyboardAvoidingView, Platform} from "react-native";
+import { Image, View, Text, Pressable, StyleSheet, TextInput, Alert, KeyboardAvoidingView, Platform } from "react-native";
 import { Ionicons, FontAwesome } from "@expo/vector-icons";
 import Footer from "../../components/Footer";
 import { useState } from "react";
 import useUserContext from "../../components/context/useUserContext";
-
 
 export default function SignIn() {
   const { login } = useUserContext();
   const [loginField, setLoginField] = useState("");
   const [senha, setSenha] = useState("");
 
+  const isValidEmail = (email) => {
+    const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return regex.test(email);
+  };
+
   const handleLogin = () => {
     if (!loginField || !senha) {
       Alert.alert("Atenção", "Preencha todos os campos.");
+      return;
+    }
+    if (loginField.includes("@") && !isValidEmail(loginField)) {
+      Alert.alert("Atenção", "Digite um email válido.");
       return;
     }
 
@@ -29,6 +37,10 @@ export default function SignIn() {
 
   return (
     <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={styles.container}>
+      <Pressable style={styles.arrowBack} onPress={() => router.back()}>
+                <Ionicons name="arrow-back" size={28} color="#fdcb58" />
+              </Pressable>
+ 
       <Image style={styles.image} source={require("@/assets/imagens/1.png")} />
 
       <View style={styles.card}>
@@ -42,12 +54,25 @@ export default function SignIn() {
 
         <View style={styles.inputContainer}>
           <Ionicons name="person" size={20} color={stylesColors.textPrimary} style={styles.icon} />
-          <TextInput style={styles.input} placeholder="Email ou Nome" placeholderTextColor={stylesColors.placeholder} value={loginField} onChangeText={setLoginField} />
+          <TextInput
+            style={styles.input}
+            placeholder="Email ou Nome"
+            placeholderTextColor={stylesColors.placeholder}
+            value={loginField}
+            onChangeText={setLoginField}
+          />
         </View>
 
         <View style={styles.inputContainer}>
           <Ionicons name="lock-closed" size={20} color={stylesColors.textPrimary} style={styles.icon} />
-          <TextInput style={styles.input} placeholder="Senha" placeholderTextColor={stylesColors.placeholder} secureTextEntry value={senha} onChangeText={setSenha} />
+          <TextInput
+            style={styles.input}
+            placeholder="Senha"
+            placeholderTextColor={stylesColors.placeholder}
+            secureTextEntry
+            value={senha}
+            onChangeText={setSenha}
+          />
         </View>
 
         <Pressable onPress={() => router.navigate("/reset")}>
@@ -83,31 +108,31 @@ const stylesColors = {
 const styles = StyleSheet.create({
   container: { 
     flex: 1,
-      backgroundColor: stylesColors.primary,
-      justifyContent: "center", 
-      alignItems: "center" 
-    },
+    backgroundColor: stylesColors.primary,
+    justifyContent: "center", 
+    alignItems: "center" 
+  },
   image: { 
     top: -60,
-     width: 250 
-    },
+    width: 250 
+  },
   card: {
-     backgroundColor: "#fff", 
-     borderRadius: 20,
-     width: "80%",
-     padding: 26,
-     gap: 12, 
-     bottom: 5, 
-     alignItems: "stretch",
-     height: 520
-    },
+    backgroundColor: "#fff", 
+    borderRadius: 20,
+    width: "80%",
+    padding: 26,
+    gap: 12, 
+    bottom: 5, 
+    alignItems: "stretch",
+    height: 520
+  },
   title: {
-     color: stylesColors.highlight,
-     fontSize: 24, 
-     textAlign: "center", 
-     fontWeight: "bold", 
-     marginBottom: 6 
-    },
+    color: stylesColors.highlight,
+    fontSize: 24, 
+    textAlign: "center", 
+    fontWeight: "bold", 
+    marginBottom: 6 
+  },
   socialContainer: { 
     flexDirection: "row", 
     justifyContent: "space-around", 
@@ -115,16 +140,16 @@ const styles = StyleSheet.create({
   },
   inputContainer: { 
     flexDirection: "row",
-     alignItems: "center",
-     borderBottomWidth: 1, 
-     borderBottomColor: "#ddd", 
-     paddingVertical: 8,
-     marginVertical: 8, 
-     marginHorizontal: 8 
-    },
+    alignItems: "center",
+    borderBottomWidth: 1, 
+    borderBottomColor: "#ddd", 
+    paddingVertical: 8,
+    marginVertical: 8, 
+    marginHorizontal: 8 
+  },
   icon: {
-     marginRight: 8 
-    },
+    marginRight: 8 
+  },
   input: { 
     flex: 1, 
     backgroundColor: "transparent", 
@@ -132,12 +157,16 @@ const styles = StyleSheet.create({
     paddingVertical: 4 
   },
   password: {
-      color: "#0c3f8c",
-      textDecorationLine: "underline",
-      textAlign: "left", 
-      margin: 8  
-    },
+    color: "#0c3f8c",
+    textDecorationLine: "underline",
+    textAlign: "left", 
+    margin: 8  
+  },
   footer: { 
     top: 20 
+  },
+  arrowBack: {
+    bottom: 100,
+    right: 180
   },
 });

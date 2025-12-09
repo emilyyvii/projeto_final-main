@@ -1,5 +1,14 @@
 import React, { useEffect, useState } from "react";
-import {View,Text,TextInput,TouchableOpacity,ScrollView,StyleSheet,Image,TouchableWithoutFeedback,} from "react-native";
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  ScrollView,
+  StyleSheet,
+  Image,
+  TouchableWithoutFeedback,
+} from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Ionicons } from "@expo/vector-icons";
@@ -76,7 +85,10 @@ export default function Health() {
   if (!petId) {
     return (
       <View
-        style={[styles.container, { justifyContent: "center", alignItems: "center" }]}
+        style={[
+          styles.container,
+          { justifyContent: "center", alignItems: "center" },
+        ]}
       >
         <Text style={{ color: "#fff" }}>Pet não encontrado</Text>
       </View>
@@ -95,22 +107,28 @@ export default function Health() {
 
       <View style={styles.petInfo}>
         <Image
-          source={petPhoto ? { uri: petPhoto } : require("@/assets/imagens/1.png")}
+          source={
+            petPhoto ? { uri: petPhoto } : require("@/assets/imagens/1.png")
+          }
           style={styles.petImage}
         />
         <Text style={styles.petName}>{petName}</Text>
       </View>
 
       <View style={styles.contentHealth}>
-        {!showInput ? (
+
+        {/* Botão + só aparece para o dono */}
+        {!isReadOnly && !showInput && (
           <TouchableOpacity
-            style={[styles.addIconContainer, isReadOnly && { opacity: 0.3 }]}
-            onPress={() => !isReadOnly && setShowInput(true)}
-            disabled={isReadOnly}
+            style={styles.addIconContainer}
+            onPress={() => setShowInput(true)}
           >
             <Ionicons name="add" size={28} color="#142A8C" />
           </TouchableOpacity>
-        ) : (
+        )}
+
+        {/* Input só aparece para o dono */}
+        {!isReadOnly && showInput && (
           <View style={styles.inputContainer}>
             <TextInput
               style={styles.input}
@@ -119,11 +137,7 @@ export default function Health() {
               value={newIssue}
               onChangeText={setNewIssue}
             />
-            <TouchableOpacity
-              style={styles.addButton}
-              onPress={handleAdd}
-              disabled={isReadOnly}
-            >
+            <TouchableOpacity style={styles.addButton} onPress={handleAdd}>
               <Text style={styles.addText}>Salvar</Text>
             </TouchableOpacity>
           </View>
@@ -131,7 +145,9 @@ export default function Health() {
 
         <ScrollView style={styles.list}>
           {healthIssues.length === 0 ? (
-            <Text style={styles.emptyText}>Nenhum problema registrado ainda.</Text>
+            <Text style={styles.emptyText}>
+              Nenhum problema registrado ainda.
+            </Text>
           ) : (
             healthIssues.map((item) => (
               <HealthItem
@@ -168,6 +184,7 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     marginLeft: 10,
   },
+  
 
   petInfo: {
     alignItems: "center",
@@ -196,6 +213,7 @@ const styles = StyleSheet.create({
     alignSelf: "center",
     marginTop: 20,
   },
+
   addIconContainer: {
     marginBottom: 16,
     borderRadius: 50,
@@ -210,6 +228,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.2,
     shadowRadius: 3,
   },
+
   inputContainer: {
     flexDirection: "row",
     marginBottom: 12,
@@ -233,6 +252,7 @@ const styles = StyleSheet.create({
     color: "black",
     fontWeight: "bold",
   },
+
   list: {
     marginTop: 8,
   },
