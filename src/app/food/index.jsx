@@ -6,7 +6,7 @@ import { useState, useEffect } from "react";
 import usePetContext from "../../components/context/usePetContext";
 
 export default function Food() {
-  const { petId, readonly } = useLocalSearchParams(); 
+  const { petId, readonly } = useLocalSearchParams();
   const isReadOnly = readonly === "true";
 
   const { pets } = usePetContext();
@@ -18,44 +18,37 @@ export default function Food() {
 
   const STORAGE_KEY = `@food_data_${petId}`;
 
-
   useEffect(() => {
     const loadData = async () => {
-      if (!petId) return;
       try {
-        const savedData = await AsyncStorage.getItem(STORAGE_KEY);
-        if (savedData) {
-          const data = JSON.parse(savedData);
+        const saved = await AsyncStorage.getItem(STORAGE_KEY);
+        if (saved) {
+          const data = JSON.parse(saved);
           setTipoRacao(data.tipoRacao || "");
           setQuantidade(data.quantidade || "");
           setEvitar(data.evitar || "");
         }
-      } catch (error) {
-        console.log("Erro ao carregar dados:", error);
+      } catch (e) {
+        console.log(e);
       }
     };
     loadData();
   }, [petId]);
 
   useEffect(() => {
-    if (isReadOnly) return; 
+    if (isReadOnly) return;
     const saveData = async () => {
-      if (!petId) return;
-      try {
-        await AsyncStorage.setItem(
-          STORAGE_KEY,
-          JSON.stringify({ tipoRacao, quantidade, evitar })
-        );
-      } catch (error) {
-        console.log("Erro ao salvar dados:", error);
-      }
+      await AsyncStorage.setItem(
+        STORAGE_KEY,
+        JSON.stringify({ tipoRacao, quantidade, evitar })
+      );
     };
     saveData();
   }, [tipoRacao, quantidade, evitar, petId, isReadOnly]);
 
-
   const limparCampo = (campo) => {
     if (isReadOnly) return;
+
     if (campo === "tipoRacao") setTipoRacao("");
     if (campo === "quantidade") setQuantidade("");
     if (campo === "evitar") setEvitar("");
@@ -64,16 +57,14 @@ export default function Food() {
   if (!pet) {
     return (
       <View style={styles.container}>
-        <Text style={{ color: "#fff", textAlign: "center", marginTop: 50 }}>
-          Pet não encontrado
-        </Text>
+        <Text style={{ color: "#fff", marginTop: 50 }}>Pet não encontrado</Text>
       </View>
     );
   }
 
   return (
     <View style={styles.container}>
-      {/* Cabeçalho */}
+      {/* Header */}
       <View style={styles.header}>
         <Pressable onPress={() => router.back()}>
           <Ionicons name="arrow-back" size={28} color="#fdcb58" />
@@ -81,69 +72,67 @@ export default function Food() {
         <Text style={styles.titleTop}>Alimentação</Text>
       </View>
 
-
+      {/* Pet name */}
       <Text style={styles.petName}>🐾 {pet.name}</Text>
 
-      {/* Corpo */}
       <View style={styles.body}>
+        {/* Card 1 */}
         <View style={styles.card}>
           <Text style={styles.title}>Dieta Atual</Text>
 
+          {/* Tipo ração */}
           <View style={styles.inputRow}>
             <TextInput
-              style={styles.input}
+              style={[styles.input, isReadOnly && styles.inputDisabled]}
               placeholder="Informe o tipo de ração"
               placeholderTextColor="#fff"
               value={tipoRacao}
-              onChangeText={isReadOnly ? undefined : setTipoRacao} 
               editable={!isReadOnly}
+              onChangeText={setTipoRacao}
             />
-            <Pressable onPress={() => limparCampo("tipoRacao")} disabled={isReadOnly}>
-              <Ionicons
-                name="trash"
-                size={22}
-                color={isReadOnly ? "#999" : "#fff"} 
-              />
-            </Pressable>
+            {!isReadOnly && (
+              <Pressable onPress={() => limparCampo("tipoRacao")}>
+                <Ionicons name="trash" size={22} color="#fff" />
+              </Pressable>
+            )}
           </View>
 
+          {/* Quantidade */}
           <View style={styles.inputRow}>
             <TextInput
-              style={styles.input}
+              style={[styles.input, isReadOnly && styles.inputDisabled]}
               placeholder="Informe a quantidade diária"
               placeholderTextColor="#fff"
               value={quantidade}
-              onChangeText={isReadOnly ? undefined : setQuantidade}
               editable={!isReadOnly}
+              onChangeText={setQuantidade}
             />
-            <Pressable onPress={() => limparCampo("quantidade")} disabled={isReadOnly}>
-              <Ionicons
-                name="trash"
-                size={22}
-                color={isReadOnly ? "#999" : "#fff"}
-              />
-            </Pressable>
+            {!isReadOnly && (
+              <Pressable onPress={() => limparCampo("quantidade")}>
+                <Ionicons name="trash" size={22} color="#fff" />
+              </Pressable>
+            )}
           </View>
         </View>
 
+        {/* Card 2 */}
         <View style={styles.card}>
           <Text style={styles.title}>Alimentos a evitar</Text>
+
           <View style={styles.inputRow}>
             <TextInput
-              style={styles.input}
+              style={[styles.input, isReadOnly && styles.inputDisabled]}
               placeholder="Informe os alimentos a evitar"
               placeholderTextColor="#fff"
               value={evitar}
-              onChangeText={isReadOnly ? undefined : setEvitar}
               editable={!isReadOnly}
+              onChangeText={setEvitar}
             />
-            <Pressable onPress={() => limparCampo("evitar")} disabled={isReadOnly}>
-              <Ionicons
-                name="trash"
-                size={22}
-                color={isReadOnly ? "#999" : "#fff"}
-              />
-            </Pressable>
+            {!isReadOnly && (
+              <Pressable onPress={() => limparCampo("evitar")}>
+                <Ionicons name="trash" size={22} color="#fff" />
+              </Pressable>
+            )}
           </View>
         </View>
       </View>
@@ -201,5 +190,8 @@ const styles = StyleSheet.create({
     flex: 1,
     color: "#fff",
     paddingVertical: 8,
+  },
+  inputDisabled: {
+    opacity: 0.5,
   },
 });

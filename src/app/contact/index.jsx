@@ -1,5 +1,17 @@
 import { useState, useEffect } from "react";
+<<<<<<< HEAD
 import { View,Text,StyleSheet,TextInput, Pressable, Keyboard,} from "react-native";
+=======
+import {
+  View,
+  Text,
+  StyleSheet,
+  TextInput,
+  Pressable,
+  Keyboard,
+  Image,
+} from "react-native";
+>>>>>>> 1ca9aa5462a958c6c06fd2196e0b2a5116e49fb0
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { MaterialIcons, Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -9,7 +21,8 @@ const KEY_EMAIL = "@contact_email";
 
 export default function Contact() {
   const router = useRouter();
-  const { readonly } = useLocalSearchParams();
+
+  const { readonly, petName, petPhoto } = useLocalSearchParams();
 
   const isReadOnly = readonly === "true";
 
@@ -70,6 +83,18 @@ export default function Contact() {
         <Text style={styles.headerTitle}>Informações de contato</Text>
       </View>
 
+      <View style={styles.petInfo}>
+        <Image
+          source={
+            petPhoto
+              ? { uri: petPhoto }
+              : require("@/assets/imagens/1.png")
+          }
+          style={styles.petImage}
+        />
+        <Text style={styles.petName}>{petName}</Text>
+      </View>
+
       <View style={styles.Content}>
 
         <View style={styles.infoBox}>
@@ -97,7 +122,11 @@ export default function Contact() {
             <Text style={styles.value}>{telefone || "—"}</Text>
           )}
         </View>
+<<<<<<< HEAD
 
+=======
+        
+>>>>>>> 1ca9aa5462a958c6c06fd2196e0b2a5116e49fb0
         <View style={styles.infoBox}>
           <View style={styles.infoHeader}>
             <Text style={styles.label}>E-mail</Text>
@@ -147,7 +176,27 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     marginLeft: 10,
   },
-  Content: { marginTop: 40 },
+
+  petInfo: {
+    alignItems: "center",
+    marginTop: 25,
+    marginBottom: 10,
+  },
+  petImage: {
+    width: 95,
+    height: 95,
+    borderRadius: 47.5,
+    borderWidth: 3,
+    borderColor: "#002E9D",
+  },
+  petName: {
+    fontSize: 22,
+    fontWeight: "bold",
+    color: "#002E9D",
+    marginTop: 10,
+  },
+
+  Content: { marginTop: 20 },
   infoBox: {
     backgroundColor: "#142A8C",
     borderRadius: 14,

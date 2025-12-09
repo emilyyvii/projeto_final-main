@@ -6,6 +6,8 @@ import {
   TouchableOpacity,
   ScrollView,
   StyleSheet,
+  Image,
+  TouchableWithoutFeedback,
 } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -14,7 +16,7 @@ import HealthItem from "../../components/HealthItem";
 
 export default function Health() {
   const router = useRouter();
-  const { petId, readonly } = useLocalSearchParams(); // 🔥 pegar readonly
+  const { petId, readonly, petName, petPhoto } = useLocalSearchParams();
   const isReadOnly = readonly === "true";
 
   const [healthIssues, setHealthIssues] = useState([]);
@@ -45,6 +47,8 @@ export default function Health() {
 
   useEffect(() => {
     if (!isLoaded) return;
+    if (isReadOnly) return;
+
     const saveHealthIssues = async () => {
       try {
         await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(healthIssues));
@@ -53,7 +57,7 @@ export default function Health() {
       }
     };
     saveHealthIssues();
-  }, [healthIssues]);
+  }, [healthIssues, isLoaded, isReadOnly]);
 
   const handleAdd = () => {
     if (newIssue.trim()) {
@@ -74,6 +78,7 @@ export default function Health() {
   };
 
   const handleDelete = (id) => {
+    if (isReadOnly) return;
     setHealthIssues((prev) => prev.filter((item) => item.id !== id));
   };
 
@@ -89,12 +94,21 @@ export default function Health() {
 
   return (
     <View style={styles.container}>
+      {/* ===== HEADER ===== */}
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()}>
+        <TouchableWithoutFeedback onPress={() => router.back()}>
           <Ionicons name="arrow-back" size={28} color="#fdcb58" />
-        </TouchableOpacity>
+        </TouchableWithoutFeedback>
         <Text style={styles.headerTitle}>Problemas de Saúde</Text>
         <View />
+      </View>
+
+      <View style={styles.petInfo}>
+        <Image
+          source={petPhoto ? { uri: petPhoto } : require("@/assets/imagens/1.png")}
+          style={styles.petImage}
+        />
+        <Text style={styles.petName}>{petName}</Text>
       </View>
 
       <View style={styles.contentHealth}>
@@ -125,7 +139,6 @@ export default function Health() {
           </View>
         )}
 
-        {/* ======= Lista ======= */}
         <ScrollView style={styles.list}>
           {healthIssues.length === 0 ? (
             <Text style={styles.emptyText}>Nenhum problema registrado ainda.</Text>
@@ -136,7 +149,7 @@ export default function Health() {
                 item={item}
                 onEdit={handleEdit}
                 onDelete={handleDelete}
-                isReadOnly={isReadOnly} // 🔥
+                isReadOnly={isReadOnly}
               />
             ))
           )}
@@ -165,11 +178,30 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     marginLeft: 10,
   },
+
+  petInfo: {
+    alignItems: "center",
+    marginTop: 25,
+    marginBottom: 10,
+  },
+  petImage: {
+    width: 95,
+    height: 95,
+    borderRadius: 47.5,
+    borderWidth: 3,
+    borderColor: "#002E9D",
+  },
+  petName: {
+    fontSize: 22,
+    fontWeight: "bold",
+    color: "#002E9D",
+    marginTop: 10,
+  },
+
   contentHealth: {
     backgroundColor: "#142A8C",
     borderRadius: 14,
     padding: 16,
-    justifyContent: "center",
     width: "90%",
     alignSelf: "center",
     marginTop: 20,

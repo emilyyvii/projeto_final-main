@@ -1,37 +1,59 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, FlatList, Pressable, ScrollView } from "react-native";
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  StyleSheet,
+  FlatList,
+  Pressable,
+  ScrollView,
+  Image,
+} from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter, useLocalSearchParams } from "expo-router";
+import usePetContext from "../../components/context/usePetContext";
 
 export default function VacinasScreen() {
   const router = useRouter();
-  const { readonly, petId } = useLocalSearchParams();
+
+  const { readonly, petId, petName: paramPetName, petPhoto: paramPetPhoto } =
+    useLocalSearchParams();
 
   const isReadOnly = readonly === "true";
   const STORAGE_KEY = `@vacinas_${petId}`;
 
+  const { pets } = usePetContext();
+  const petFromContext = pets.find((p) => String(p.id) === String(petId));
+  const petName = paramPetName ?? petFromContext?.name ?? "";
+  const petPhoto = paramPetPhoto ?? petFromContext?.photo ?? "";
+
   const [vacinas, setVacinas] = useState([]);
+  const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {
-    const loadVacinas = async () => {
-      if (!petId) return;
+    if (!petId) return;
 
+    const load = async () => {
       try {
         const saved = await AsyncStorage.getItem(STORAGE_KEY);
         if (saved) setVacinas(JSON.parse(saved));
       } catch (err) {
         console.log("Erro ao carregar vacinas:", err);
+      } finally {
+        setIsLoaded(true);
       }
     };
 
-    loadVacinas();
+    load();
   }, [petId]);
 
   useEffect(() => {
+    if (!isLoaded) return;
     if (isReadOnly) return;
 
-    const saveVacinas = async () => {
+    const save = async () => {
       try {
         await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(vacinas));
       } catch (err) {
@@ -39,14 +61,14 @@ export default function VacinasScreen() {
       }
     };
 
-    saveVacinas();
-  }, [vacinas, isReadOnly]);
+    save();
+  }, [vacinas, isLoaded, isReadOnly]);
 
   const addVacina = () => {
     if (isReadOnly) return;
 
     const nova = {
-      id: Date.now(),
+      id: Date.now().toString(),
       nome: "",
       aplicacao: "",
       validade: "",
@@ -57,6 +79,7 @@ export default function VacinasScreen() {
 
   const editarCampo = (id, campo, valor) => {
     if (isReadOnly) return;
+
     setVacinas((prev) =>
       prev.map((v) => (v.id === id ? { ...v, [campo]: valor } : v))
     );
@@ -69,8 +92,6 @@ export default function VacinasScreen() {
 
   const renderItem = ({ item }) => (
     <View style={styles.row}>
-      
-      {/* Nome */}
       {!isReadOnly ? (
         <TextInput
           style={[styles.cell, { flex: 2 }]}
@@ -80,10 +101,11 @@ export default function VacinasScreen() {
           onChangeText={(t) => editarCampo(item.id, "nome", t)}
         />
       ) : (
-        <Text style={[styles.cell, { flex: 2 }]}>{item.nome || "-"}</Text>
+        <Text style={[styles.cellTextOnly, { flex: 2 }]}>
+          {item.nome || "-"}
+        </Text>
       )}
 
-      {/* Data */}
       {!isReadOnly ? (
         <TextInput
           style={styles.cell}
@@ -93,10 +115,9 @@ export default function VacinasScreen() {
           onChangeText={(t) => editarCampo(item.id, "aplicacao", t)}
         />
       ) : (
-        <Text style={styles.cell}>{item.aplicacao || "-"}</Text>
+        <Text style={styles.cellTextOnly}>{item.aplicacao || "-"}</Text>
       )}
 
-      {/* Validade */}
       {!isReadOnly ? (
         <TextInput
           style={styles.cell}
@@ -106,10 +127,9 @@ export default function VacinasScreen() {
           onChangeText={(t) => editarCampo(item.id, "validade", t)}
         />
       ) : (
-        <Text style={styles.cell}>{item.validade || "-"}</Text>
+        <Text style={styles.cellTextOnly}>{item.validade || "-"}</Text>
       )}
 
-      {/* Lixeira só para o dono */}
       {!isReadOnly && (
         <TouchableOpacity onPress={() => excluirVacina(item.id)}>
           <Ionicons name="trash" size={22} color="#fff" style={styles.trash} />
@@ -118,9 +138,18 @@ export default function VacinasScreen() {
     </View>
   );
 
+  if (!petId) {
+    return (
+      <View style={styles.container}>
+        <Text style={{ color: "#fff", textAlign: "center", marginTop: 50 }}>
+          Pet não encontrado
+        </Text>
+      </View>
+    );
+  }
+
   return (
     <View style={styles.container}>
-
       <View style={styles.header}>
         <Pressable onPress={() => router.back()}>
           <Ionicons name="arrow-back" size={28} color="#fdcb58" />
@@ -128,36 +157,40 @@ export default function VacinasScreen() {
         <Text style={styles.headerTitle}>Vacinas</Text>
       </View>
 
+      <View style={styles.petInfo}>
+        <Image
+          source={petPhoto ? { uri: petPhoto } : require("@/assets/imagens/1.png")}
+          style={styles.petImage}
+        />
+        <Text style={styles.petName}>{petName}</Text>
+      </View>
+
       <View style={styles.tableVaccine}>
         <View style={[styles.row, styles.columTable]}>
-          <Text style={[styles.cell, { flex: 2, fontWeight: "bold" }]}>
-            Vacinas
-          </Text>
-          <Text style={[styles.cell, { fontWeight: "bold" }]}>Data</Text>
-          <Text style={[styles.cell, { fontWeight: "bold" }]}>Validade</Text>
+          <Text style={[styles.headerCell, { flex: 2 }]}>Vacinas</Text>
+          <Text style={styles.headerCell}>Data</Text>
+          <Text style={styles.headerCell}>Validade</Text>
           <View style={{ width: 30 }} />
         </View>
 
-        <ScrollView style={{ maxHeight: 380 }}>
+        <ScrollView style={{ maxHeight: 370 }}>
           <FlatList
             data={vacinas}
-            keyExtractor={(item) => item.id.toString()}
+            keyExtractor={(item) => item.id}
             renderItem={renderItem}
             scrollEnabled={false}
             ListEmptyComponent={
-              <Text style={styles.emptyText}>Nenhuma vacina adicionada</Text>
+              <Text style={styles.emptyText}>Nenhuma vacina cadastrada</Text>
             }
           />
         </ScrollView>
 
-        {/* Botão de adicionar só para o dono */}
         {!isReadOnly && (
           <TouchableOpacity style={styles.addButton} onPress={addVacina}>
             <Ionicons name="add" size={28} color="#fdcb58" />
           </TouchableOpacity>
         )}
       </View>
-
     </View>
   );
 }
@@ -184,15 +217,44 @@ const styles = StyleSheet.create({
     marginLeft: 10,
   },
 
+  petInfo: {
+    alignItems: "center",
+    marginTop: 25,
+    marginBottom: 10,
+  },
+
+  petImage: {
+    width: 95,
+    height: 95,
+    borderRadius: 47.5,
+    borderWidth: 3,
+    borderColor: "#002E9D",
+  },
+
+  petName: {
+    fontSize: 22,
+    fontWeight: "bold",
+    color: "#002E9D",
+    marginTop: 10,
+  },
+
   tableVaccine: {
-    marginTop: 50,
+    marginTop: 25,
     width: "90%",
     alignSelf: "center",
+    flex: 1,
   },
 
   columTable: {
     backgroundColor: "#141496",
     borderRadius: 10,
+  },
+
+  headerCell: {
+    flex: 1,
+    color: "#fff",
+    fontWeight: "bold",
+    paddingVertical: 10,
   },
 
   row: {
@@ -206,6 +268,14 @@ const styles = StyleSheet.create({
   },
 
   cell: {
+    flex: 1,
+    fontSize: 14,
+    paddingHorizontal: 4,
+    paddingVertical: 10,
+    color: "#fff",
+  },
+
+  cellTextOnly: {
     flex: 1,
     fontSize: 14,
     paddingHorizontal: 4,
