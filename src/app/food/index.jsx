@@ -1,17 +1,12 @@
-import {View,Text,TextInput,StyleSheet,Pressable,TouchableOpacity,ScrollView} from "react-native";
+import {View,Text,Image,TextInput,StyleSheet,Pressable,TouchableOpacity,ScrollView} from "react-native";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { router, useLocalSearchParams } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useState, useEffect } from "react";
-import usePetContext from "../../components/context/usePetContext";
-
 
 export default function Food() {
-  const { petId, readonly } = useLocalSearchParams();
+  const { petId, readonly, petName, petPhoto } = useLocalSearchParams();
   const isReadOnly = readonly === "true";
-
-  const { pets } = usePetContext();
-  const pet = pets.find((p) => String(p.id) === String(petId));
 
   const [dietItems, setDietItems] = useState([]);
   const [avoidItems, setAvoidItems] = useState([]);
@@ -25,7 +20,6 @@ export default function Food() {
 
   const STORAGE_KEY = `@food_lists_${petId}`;
 
-  
   useEffect(() => {
     const loadData = async () => {
       try {
@@ -41,7 +35,6 @@ export default function Food() {
     };
     loadData();
   }, [petId]);
-
 
   useEffect(() => {
     if (isReadOnly) return;
@@ -129,7 +122,8 @@ export default function Food() {
     if (isReadOnly) return;
     setAvoidItems((items) => items.filter((it) => it.id !== id));
   };
-  if (!pet) {
+
+  if (!petId) {
     return (
       <View style={styles.container}>
         <Text style={{ color: "#fff", marginTop: 50 }}>Pet não encontrado</Text>
@@ -146,11 +140,23 @@ export default function Food() {
         <Text style={styles.titleTop}>Alimentação</Text>
       </View>
 
-      <Text style={styles.petName}>🐾 {pet.name}</Text>
+      {/* --- FOTO DO PET IGUAL HEALTH --- */}
+      <Image
+        source={
+          petPhoto
+            ? { uri: petPhoto }
+            : require("@/assets/imagens/1.png")
+        }
+        style={styles.petImage}
+      />
+
+      {/* --- NOME DO PET IGUAL HEALTH --- */}
+      <Text style={styles.petName}>{petName}</Text>
 
       <ScrollView contentContainerStyle={{ alignItems: "center", paddingBottom: 70 }}>
+        
+        {/* ----------- DIETA ----------- */}
         <View style={styles.card}>
-
           <Text style={styles.title}>Dieta Atual</Text>
 
           {!showDietInput && !isReadOnly && (
@@ -232,27 +238,23 @@ export default function Food() {
               ) : (
                 <View style={styles.rowBetween}>
                   <View>
-                    <Text style={styles.itemText}>
-                     {item.food}
-                    </Text>
-                    <Text style={styles.itemTextSmall}>
-                      {item.quantity}
-                    </Text>
+                    <Text style={styles.itemText}>{item.food}</Text>
+                    <Text style={styles.itemTextSmall}>{item.quantity}</Text>
                   </View>
 
                   {!isReadOnly && (
                     <View style={styles.iconRow}>
                       <Pressable onPress={() => toggleEditDiet(item.id)}>
-                      <MaterialIcons name="edit" size={22} color="#142A8C" />
+                        <MaterialIcons name="edit" size={22} color="#142A8C" />
                       </Pressable>
 
                       <Pressable onPress={() => deleteDiet(item.id)}>
-                        <MaterialIcons name="delete"
+                        <MaterialIcons
+                          name="delete"
                           size={22}
                           color="red"
                           style={{ marginLeft: 10 }}
                         />
-                     
                       </Pressable>
                     </View>
                   )}
@@ -262,6 +264,7 @@ export default function Food() {
           ))}
         </View>
 
+        {/* ----------- ALIMENTOS A EVITAR ----------- */}
         <View style={styles.card}>
           <Text style={styles.title}>Alimentos a evitar</Text>
 
@@ -319,15 +322,17 @@ export default function Food() {
                 </View>
               ) : (
                 <View style={styles.rowBetween}>
-                  <Text style={styles.itemText}> {item.text}</Text>
+                  <Text style={styles.itemText}>{item.text}</Text>
+
                   {!isReadOnly && (
                     <View style={styles.iconRow}>
                       <Pressable onPress={() => toggleEditAvoid(item.id)}>
-                      <MaterialIcons name="edit" size={22} color="#142A8C" />
+                        <MaterialIcons name="edit" size={22} color="#142A8C" />
                       </Pressable>
 
                       <Pressable onPress={() => deleteAvoid(item.id)}>
-                        <MaterialIcons name="delete"
+                        <MaterialIcons
+                          name="delete"
                           size={22}
                           color="red"
                           style={{ marginLeft: 10 }}
@@ -340,6 +345,7 @@ export default function Food() {
             </View>
           ))}
         </View>
+
       </ScrollView>
     </View>
   );
@@ -364,12 +370,23 @@ const styles = StyleSheet.create({
     marginLeft: 12,
   },
 
+  // --- MESMOS DO HEALTH ---
+  petImage: {
+    width: 95,
+    height: 95,
+    borderRadius: 47.5,
+    borderWidth: 3,
+    borderColor: "#002E9D",
+    alignSelf: "center",
+    marginTop: 25,
+  },
+
   petName: {
     textAlign: "center",
     fontSize: 20,
     fontWeight: "bold",
     color: "#142A8C",
-    marginTop: 25,
+    marginTop: 15,
   },
 
   card: {
