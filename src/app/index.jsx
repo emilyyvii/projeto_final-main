@@ -13,7 +13,6 @@ export default function Index() {
         source={require("@/assets/imagens/1.png")}
       />
 
-      {/* PROFISSIONAL */}
       <TouchableOpacity
         style={styles.button}
         onPress={() => router.push("/verify")}
@@ -21,7 +20,6 @@ export default function Index() {
         <Text style={styles.title}>PROFISSIONAL</Text>
       </TouchableOpacity>
 
-      {/* ENCONTREI O PET */}
       <TouchableOpacity
         style={styles.button}
         onPress={() => router.push("/contact?readonly=true")}
@@ -29,7 +27,6 @@ export default function Index() {
         <Text style={styles.title}>ENCONTREI O PET</Text>
       </TouchableOpacity>
 
-      {/* TUTOR (Dono) */}
       <TouchableOpacity
         style={styles.button}
         onPress={() => router.push("/signin?readonly=false")}

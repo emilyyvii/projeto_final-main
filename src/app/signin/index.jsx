@@ -1,139 +1,143 @@
 import Button from "@/components/Button";
 import { router } from "expo-router";
-import { Image, View, Text, Pressable, StyleSheet, TextInput } from "react-native";
+import {Image,View,Text,Pressable,StyleSheet,TextInput,Alert,KeyboardAvoidingView, Platform} from "react-native";
 import { Ionicons, FontAwesome } from "@expo/vector-icons";
 import Footer from "../../components/Footer";
+import { useState } from "react";
+import useUserContext from "../../components/context/useUserContext";
+
 
 export default function SignIn() {
+  const { login } = useUserContext();
+  const [loginField, setLoginField] = useState("");
+  const [senha, setSenha] = useState("");
+
+  const handleLogin = () => {
+    if (!loginField || !senha) {
+      Alert.alert("Atenção", "Preencha todos os campos.");
+      return;
+    }
+
+    const res = login(loginField, senha);
+    if (!res.success) {
+      Alert.alert("Erro", res.message || "Usuário ou senha incorretos.");
+      return;
+    }
+
+    router.replace("/home");
+  };
+
   return (
-    <View style={styles.container}>
+    <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={styles.container}>
       <Image style={styles.image} source={require("@/assets/imagens/1.png")} />
 
       <View style={styles.card}>
-      <View style={styles.socialContainer}>
-         <FontAwesome name="google" size={40} color="#EA4335" />
-         <FontAwesome name="facebook" size={40}  color="#1877F2" />
-         <Ionicons name="logo-apple" size={40} color="#000" />
-      </View>
+        <View style={styles.socialContainer}>
+          <FontAwesome name="google" size={40} color={stylesColors.google} />
+          <FontAwesome name="facebook" size={40} color={stylesColors.facebook} />
+          <Ionicons name="logo-apple" size={40} color={stylesColors.textPrimary} />
+        </View>
+
         <Text style={styles.title}>Bem vindo(a)!</Text>
 
-        {/* Campo Login */}
         <View style={styles.inputContainer}>
-        <Ionicons name="person" size={20} color="#000" style={styles.icon} />
-          <TextInput
-            style={styles.input}
-            placeholder="Login"
-            placeholderTextColor="#000"
-          />
+          <Ionicons name="person" size={20} color={stylesColors.textPrimary} style={styles.icon} />
+          <TextInput style={styles.input} placeholder="Email ou Nome" placeholderTextColor={stylesColors.placeholder} value={loginField} onChangeText={setLoginField} />
         </View>
 
-        {/* Campo Senha */}
         <View style={styles.inputContainer}>
-        <Ionicons name="lock-closed" size={20} color="#000" style={styles.icon} />
-          <TextInput
-            style={styles.input}
-            placeholder="Senha"
-            placeholderTextColor="#000"
-            secureTextEntry
-          />
+          <Ionicons name="lock-closed" size={20} color={stylesColors.textPrimary} style={styles.icon} />
+          <TextInput style={styles.input} placeholder="Senha" placeholderTextColor={stylesColors.placeholder} secureTextEntry value={senha} onChangeText={setSenha} />
         </View>
 
-        {/* Esqueci a senha */}
-        <Pressable onPress={() => router .navigate('/reset')}>
+        <Pressable onPress={() => router.navigate("/reset")}>
           <Text style={styles.password}>Esqueci a senha</Text>
         </Pressable>
 
-        {/* Botão Entrar */}
-        <Button title={"ENTRAR"} onPress={() => router.navigate("/home")} />
+        <Button title={"ENTRAR"} onPress={handleLogin} />
 
-        {/* Criar conta */}
-        <Text style={{ textAlign: "center" }}>
+        <Text style={{ textAlign: "center", marginTop: 8 }}>
           Não possui uma conta?{" "}
-          <Text
-            style={styles.password}
-            onPress={() => router.navigate("/signup")}
-          >
+          <Text style={styles.password} onPress={() => router.navigate("/signup")}>
             Criar conta
           </Text>
         </Text>
       </View>
-      <View style={styles.footer}>
-        <Footer
-          text="Apaixonados por animal"
-          textColor="#fff"
-          showImage={false}
-        />
-      </View>
 
-    </View>
+      <View style={styles.footer}>
+        <Footer text="Apaixonados por animal" textColor="#fff" showImage={false} />
+      </View>
+    </KeyboardAvoidingView>
   );
 }
 
+const stylesColors = {
+  primary: "#141496",
+  highlight: "#fdcb58",
+  textPrimary: "#000",
+  placeholder: "#666",
+  google: "#EA4335",
+  facebook: "#1877F2",
+};
+
 const styles = StyleSheet.create({
-  container: {
+  container: { 
     flex: 1,
-    backgroundColor: "#141496",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  socialContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    width: '70%',
-    marginBottom: 10,
-  },
-  image: {
+      backgroundColor: stylesColors.primary,
+      justifyContent: "center", 
+      alignItems: "center" 
+    },
+  image: { 
     top: -60,
-    width: 250
-  },
+     width: 250 
+    },
   card: {
-    backgroundColor: "#fff",
-    borderRadius: 20,
-    width: "80%",
-    padding: 35,
-    gap: 20,
-    bottom: 5,
-    alignItems: "stretch",
-    height: 550,
-  },
+     backgroundColor: "#fff", 
+     borderRadius: 20,
+     width: "80%",
+     padding: 26,
+     gap: 12, 
+     bottom: 5, 
+     alignItems: "stretch",
+     height: 520
+    },
   title: {
-    color: "#fdcb58",
-    fontSize: 26,
-    textAlign: "center",
-    fontWeight: "bold",
-    marginBottom: 10,
+     color: stylesColors.highlight,
+     fontSize: 24, 
+     textAlign: "center", 
+     fontWeight: "bold", 
+     marginBottom: 6 
+    },
+  socialContainer: { 
+    flexDirection: "row", 
+    justifyContent: "space-around", 
+    marginBottom: 12 
   },
-  inputContainer: {
+  inputContainer: { 
     flexDirection: "row",
-    alignItems: "center",
-    borderBottomWidth: 1,
-    borderBottomColor: "#ccc",
-    paddingVertical: 5,
-    margin: 20
-  },
+     alignItems: "center",
+     borderBottomWidth: 1, 
+     borderBottomColor: "#ddd", 
+     paddingVertical: 8,
+     marginVertical: 8, 
+     marginHorizontal: 8 
+    },
   icon: {
-    marginRight: 8,
-  },
-  socialContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    width: '70%',
-    marginBottom: 10,
-    left: 37,
-  },
-  input: {
-    flex: 1,
-    backgroundColor: "transparent",
-    color: "#000",
-    paddingVertical: 4,
+     marginRight: 8 
+    },
+  input: { 
+    flex: 1, 
+    backgroundColor: "transparent", 
+    color: stylesColors.textPrimary, 
+    paddingVertical: 4 
   },
   password: {
-    color: "#0c3f8c",
-    textDecorationLine: "underline",
-    textAlign: "left",
-    margin: 15
+      color: "#0c3f8c",
+      textDecorationLine: "underline",
+      textAlign: "left", 
+      margin: 8  
+    },
+  footer: { 
+    top: 20 
   },
-  footer:{
-    top: 50
-  }
 });

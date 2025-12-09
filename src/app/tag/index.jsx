@@ -40,7 +40,6 @@ export default function Tag() {
 
       <ScrollView contentContainerStyle={{ paddingBottom: 40 }}>
         <View style={styles.yellowContainer}>
-          {/* PETS EM CIMA */}
           <ScrollView horizontal showsHorizontalScrollIndicator={false}>
             <View style={{ flexDirection: "row" }}>
               {pets.map((item) => (
@@ -68,11 +67,9 @@ export default function Tag() {
             {pet && <QRCode size={180} value={`myapp://verify?code=${petCode}`} />}
           </View>
 
-          {/* Código manual */}
           <Text style={styles.codeLabel}>Código da Coleira</Text>
           <Text style={styles.codeBox}>{petCode}</Text>
 
-          {/* Ícone de bateria */}
           <View style={styles.batteryContainer}>
             <View style={styles.battery}>
               <View

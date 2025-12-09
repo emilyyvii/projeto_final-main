@@ -1,12 +1,5 @@
 import { useState, useEffect } from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  TextInput,
-  Pressable,
-  Keyboard,
-} from "react-native";
+import { View,Text,StyleSheet,TextInput, Pressable, Keyboard,} from "react-native";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { MaterialIcons, Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -79,12 +72,10 @@ export default function Contact() {
 
       <View style={styles.Content}>
 
-        {/* TELEFONE */}
         <View style={styles.infoBox}>
           <View style={styles.infoHeader}>
             <Text style={styles.label}>Número de telefone</Text>
 
-            {/* 🔥 Ícone de editar só aparece para o dono */}
             {!isReadOnly && (
               <Pressable onPress={toggleEditTelefone}>
                 <MaterialIcons name="edit" size={22} color="#F7C843" />
@@ -107,12 +98,10 @@ export default function Contact() {
           )}
         </View>
 
-        {/* EMAIL */}
         <View style={styles.infoBox}>
           <View style={styles.infoHeader}>
             <Text style={styles.label}>E-mail</Text>
 
-            {/* 🔥 Ícone escondido para profissionais */}
             {!isReadOnly && (
               <Pressable onPress={toggleEditEmail}>
                 <MaterialIcons name="edit" size={22} color="#F7C843" />
